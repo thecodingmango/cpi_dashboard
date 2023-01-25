@@ -13,9 +13,9 @@ from dash import Output, Input
 from dash import html
 import pandas as pd
 
-CPI = pd.read_csv('Data/CPI_data_1997_to_2022.csv')
-Energy_Price = pd.read_csv('Data/Energy_Prices.csv')
-Oil_Production = pd.read_csv('Data/International_PetroleumProduction_Consumption_and_Inventories.csv')
+CPI = pd.read_csv('data/CPI_data_1997_to_2022.csv')
+Energy_Price = pd.read_csv('data/Energy_Prices.csv')
+Oil_Production = pd.read_csv('data/International_PetroleumProduction_Consumption_and_Inventories.csv')
 
 # Merge all data
 all_data = CPI.merge(Energy_Price, how='left', on='DATE').merge(Oil_Production, how='left', on='DATE')
