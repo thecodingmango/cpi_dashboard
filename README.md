@@ -1,4 +1,4 @@
 # CPI Dashboard  
 
 
-[link]https://cpi-dashboard-tjdc.onrender.com/
+The Dashboard is available here: [https://cpi-dashboard-tjdc.onrender.com/]
