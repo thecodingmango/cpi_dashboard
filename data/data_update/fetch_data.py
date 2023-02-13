@@ -19,7 +19,6 @@ class Updator:
         """
         Takes in a list of series id and retrieve their data values from the website
         :param series_id: List of series id in strings
-        :return:
         """
 
         headers = {'Content-type': 'application/json'}
