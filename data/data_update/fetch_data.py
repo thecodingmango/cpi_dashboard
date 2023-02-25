@@ -18,7 +18,7 @@ class Updator:
 
     @staticmethod
     # Function that converts dictionaries to list
-    def dict_to_list(keys, dicts):
+    def dict_to_list(dicts, keys):
         """
         Function that takes in list of dictionaries and return the values in each of the dictionaries with the specified
         key
@@ -37,12 +37,34 @@ class Updator:
 
         return list_array
 
+    @staticmethod
+    # Function for the retrieve data function that converts list of dict into a Pandas dataframe
+    def list_to_df(list_dict, key, column_name):
+        """
+        Takes in a list of dict and converts it into pandas dataframe
+        :param key: Key must be a list of key to search through
+        :param list_dict: List of dict
+        :return: Pandas dataframe
+        """
+
+        temp_list = []
+
+        for series in list_dict:
+
+            temp_list += Updator.dict_to_list(series[key[0]], [key[1]])
+
+        data_df = pd.DataFrame(temp_list).transpose()
+
+        data_df.columns = ['column1', 'column2']
+
+        return data_df
+
     # Function to retrieve data from the US BLS website
     def retrieve_data_bls(self):
-
         """
         Takes in a list of series id and retrieve their data values from the website
-        :param series_id: List of series id in strings
+        :param: List of series id in strings
+        :return: Pandas Dataframe
         """
 
         headers = {'Content-type': 'application/json'}
@@ -62,10 +84,12 @@ class Updator:
 data = Updator()
 retrieved_data = data.retrieve_data_bls()
 retrieved_data_2 = data.retrieve_data_bls()
-test = dict_to_list(['year', 'periodName', 'value'], retrieved_data['Results']['series'][1]['data'])
+test = data.dict_to_list(['year', 'periodName', 'value'], retrieved_data['Results']['series'][1]['data'])
+
+data.list_to_df(retrieved_data['Results']['series'], ['data', 'value'])
 
 test = []
 for series in retrieved_data['Results']['series']:
 
-    test += dict_to_list(['value'], series['data'])
+    test += data.dict_to_list(series['data'], ['value'])
 pd.DataFrame(test).transpose()
