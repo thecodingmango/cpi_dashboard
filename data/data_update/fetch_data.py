@@ -8,28 +8,6 @@ import api_keys
 import config
 
 
-# Function that converts dictionaries to list
-def dict_to_list(keys, dicts):
-
-    """
-    Function that takes in list of dictionaries and return the values in each of the dictionaries with the specified
-    key
-    :param keys: List of keys
-    :param dicts: List of Dict
-    :return: numpy array
-    """
-
-    list_array = []
-
-    for key in keys:
-
-        list_item = [item.get(key) for item in dicts]
-
-        list_array.append(list_item)
-
-    return list_array
-
-
 class Updator:
 
     def __init__(self):
@@ -37,6 +15,27 @@ class Updator:
         self.bls_url = config.url_bls
         self.start_year = config.start_year
         self.end_year = config.end_year
+
+    @staticmethod
+    # Function that converts dictionaries to list
+    def dict_to_list(keys, dicts):
+        """
+        Function that takes in list of dictionaries and return the values in each of the dictionaries with the specified
+        key
+        :param keys: List of keys
+        :param dicts: List of Dict
+        :return: numpy array
+        """
+
+        list_array = []
+
+        for key in keys:
+
+            list_item = [item.get(key) for item in dicts]
+
+            list_array.append(list_item)
+
+        return list_array
 
     # Function to retrieve data from the US BLS website
     def retrieve_data_bls(self):
