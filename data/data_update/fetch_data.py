@@ -6,6 +6,7 @@ import json
 import pandas as pd
 import api_keys
 import config
+import numpy as np
 
 
 class Updator:
@@ -38,8 +39,8 @@ class Updator:
         return list_array
 
     @staticmethod
-    # Function for the retrieve data function that converts list of dict into a Pandas dataframe
-    def list_to_df(list_dict, key, column_name):
+    # Function for the retrieve data function that converts list of dict into a Pandas dataframe for the BLS data
+    def dict_to_df(list_dict, key):
         """
         Takes in a list of dict and converts it into pandas dataframe
         :param key: Key must be a list of key to search through
@@ -49,15 +50,39 @@ class Updator:
 
         temp_list = []
 
-        for series in list_dict:
+        for item in list_dict:
 
-            temp_list += Updator.dict_to_list(series[key[0]], [key[1]])
+            temp_list += Updator.dict_to_list(item[key[0]], [key[1]])
 
         data_df = pd.DataFrame(temp_list).transpose()
 
-        data_df.columns = ['column1', 'column2']
-
         return data_df
+
+    @staticmethod
+    # Function to parse year and month in yyyy-mm-01 format for the BLS data
+    def bls_parse_date(list_dict):
+        """
+        The function is to parse date for the BLS data from year and month to YYYY-mm-01. It takes in a list of dicts,
+        and will parse data according to the given keys
+        :param list_dict: List of dictionaries that contains the year and period
+        :return: Panda dataframe with the first day of the month
+        """
+
+        # Parse the dictionaries into a list
+        year = Updator.dict_to_list(list_dict, ['year'])
+        month = Updator.dict_to_list(list_dict, ['period'])
+
+        year_month = []
+
+        for date in list(zip(*year, *month)):
+
+            # Join year and month together and set the date to first day of the month
+            year_month += ['-'.join(date) + '-01']
+
+            # Remove letter m in period
+            year_month = [str(item).replace('M', '') for item in year_month]
+
+        return pd.DataFrame(year_month)
 
     # Function to retrieve data from the US BLS website
     def retrieve_data_bls(self):
@@ -78,18 +103,14 @@ class Updator:
 
         print(json_data)
 
-        return json_data
+        bls_df = Updator.dict_to_df(json_data['Results']['series'], ['data', 'value'])
+        bls_df['year_month'] = Updator.bls_parse_date(json_data['Results']['series'][0]['data'])
+
+        return bls_df
 
 
 data = Updator()
 retrieved_data = data.retrieve_data_bls()
-retrieved_data_2 = data.retrieve_data_bls()
-test = data.dict_to_list(['year', 'periodName', 'value'], retrieved_data['Results']['series'][1]['data'])
+# test = data.dict_to_list(['year', 'periodName', 'value'], retrieved_data['Results']['series'][1]['data'])
 
-data.list_to_df(retrieved_data['Results']['series'], ['data', 'value'])
-
-test = []
-for series in retrieved_data['Results']['series']:
-
-    test += data.dict_to_list(series['data'], ['value'])
-pd.DataFrame(test).transpose()
+#test = data.bls_parse_date(retrieved_data['Results']['series'][0]['data'])
