@@ -8,7 +8,7 @@ import api_keys
 import config
 
 
-class Updator:
+class Updater:
 
     def __init__(self):
         self.bls_series = config.bls_series

@@ -7,3 +7,4 @@
 .idea/workspace.xml
 .venv
 /api_keys.py
+*.pyc
