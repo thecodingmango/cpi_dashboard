@@ -6,13 +6,12 @@ import json
 import pandas as pd
 import api_keys
 import config
-import numpy as np
 
 
 class Updator:
 
     def __init__(self):
-        self.bls_series = config.series
+        self.bls_series = config.bls_series
         self.bls_url = config.url_bls
         self.start_year = config.start_year
         self.end_year = config.end_year
@@ -94,16 +93,17 @@ class Updator:
 
         headers = {'Content-type': 'application/json'}
         data = json.dumps({'seriesid': self.bls_series,
-                           'startyear': str(self.start_year),
-                           'endyear': str(self.end_year),
+                           'startyear': self.start_year,
+                           'endyear': self.end_year,
                            "registrationkey": api_keys.bls_api_key})
 
         p = requests.post(self.bls_url, data=data, headers=headers)
         json_data = json.loads(p.text)
 
-        print(json_data)
+        print(p.content)
 
         bls_df = Updator.dict_to_df(json_data['Results']['series'], ['data', 'value'])
+        bls_df.columns = config.bls_series_name
         bls_df['year_month'] = Updator.bls_parse_date(json_data['Results']['series'][0]['data'])
 
         return bls_df
@@ -111,6 +111,3 @@ class Updator:
 
 data = Updator()
 retrieved_data = data.retrieve_data_bls()
-# test = data.dict_to_list(['year', 'periodName', 'value'], retrieved_data['Results']['series'][1]['data'])
-
-#test = data.bls_parse_date(retrieved_data['Results']['series'][0]['data'])
