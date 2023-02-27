@@ -24,7 +24,7 @@ class Updator:
         key
         :param keys: List of keys
         :param dicts: List of Dict
-        :return: numpy array
+        :return: Nested list of items
         """
 
         list_array = []
@@ -100,7 +100,7 @@ class Updator:
         p = requests.post(self.bls_url, data=data, headers=headers)
         json_data = json.loads(p.text)
 
-        print(p.content)
+        print(p.text)
 
         bls_df = Updator.dict_to_df(json_data['Results']['series'], ['data', 'value'])
         bls_df.columns = config.bls_series_name
