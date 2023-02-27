@@ -51,7 +51,7 @@ class Updater:
 
         for item in list_dict:
 
-            temp_list += Updator.dict_to_list(item[key[0]], [key[1]])
+            temp_list += Updater.dict_to_list(item[key[0]], [key[1]])
 
         data_df = pd.DataFrame(temp_list).transpose()
 
@@ -68,8 +68,8 @@ class Updater:
         """
 
         # Parse the dictionaries into a list
-        year = Updator.dict_to_list(list_dict, ['year'])
-        month = Updator.dict_to_list(list_dict, ['period'])
+        year = Updater.dict_to_list(list_dict, ['year'])
+        month = Updater.dict_to_list(list_dict, ['period'])
 
         year_month = []
 
@@ -102,12 +102,12 @@ class Updater:
 
         print(p.text)
 
-        bls_df = Updator.dict_to_df(json_data['Results']['series'], ['data', 'value'])
+        bls_df = Updater.dict_to_df(json_data['Results']['series'], ['data', 'value'])
         bls_df.columns = config.bls_series_name
-        bls_df['year_month'] = Updator.bls_parse_date(json_data['Results']['series'][0]['data'])
+        bls_df['year_month'] = Updater.bls_parse_date(json_data['Results']['series'][0]['data'])
 
         return bls_df
 
 
-data = Updator()
+data = Updater()
 retrieved_data = data.retrieve_data_bls()
