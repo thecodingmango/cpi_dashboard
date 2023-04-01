@@ -12,7 +12,9 @@ class Updater:
 
     def __init__(self):
         self.bls_series = config.bls_series
+        self.eia_series = config.eia_series
         self.bls_url = config.url_bls
+        self.eia_url = config.url_eia
         self.start_year = config.start_year
         self.end_year = config.end_year
 
@@ -22,7 +24,7 @@ class Updater:
         """
         Function that takes in list of dictionaries and return the values in each of the dictionaries with the specified
         key
-        :param keys: List of keys
+        :param keys: List of keys, m
         :param dicts: List of Dict
         :return: Nested list of items
         """
@@ -100,7 +102,7 @@ class Updater:
         p = requests.post(self.bls_url, data=data, headers=headers)
         json_data = json.loads(p.text)
 
-        print(p.text)
+        print(json_data)
 
         bls_df = Updater.dict_to_df(json_data['Results']['series'], ['data', 'value'])
         bls_df.columns = config.bls_series_name
@@ -108,6 +110,22 @@ class Updater:
 
         return bls_df
 
+    # Function to retrieve data from the US Energy Information Administration
+    def retrieve_data_eia(self):
+        """
+        Used to retrieve data from the US EIA website using an API key
+        :return:
+        """
+
+        api_request = self.eia_url + 'petroleum/pri/spt/data/?data[0]=value&facets[product][]=EPCBRENT&facets[product][]=EPCWTI&sort[0][column]=period&sort[0][direction]=desc' + '&' + 'api_key='+ api_keys.eia_api_key + '&frequency=monthly'
+
+        r = requests.get(api_request)
+        json_data = r.json()
+
+
+        return json_data
 
 data = Updater()
 retrieved_data = data.retrieve_data_bls()
+eia_api = data.retrieve_data_eia()
+eia = pd.DataFrame(data.dict_to_list(eia_api['response']['data'], ['value', 'period'])).transpose()
