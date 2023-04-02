@@ -117,15 +117,25 @@ class Updater:
         :return:
         """
 
-        api_request = self.eia_url + 'petroleum/pri/spt/data/?data[0]=value&facets[product][]=EPCBRENT&facets[product][]=EPCWTI&sort[0][column]=period&sort[0][direction]=desc' + '&' + 'api_key='+ api_keys.eia_api_key + '&frequency=monthly'
+        #
+        sort_value = '&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000'
+        frequency = '&frequency=monthly'
+        api_key = '&api_key=' + api_keys.eia_api_key
 
-        r = requests.get(api_request)
-        json_data = r.json()
+        temp_list = []
 
+        for series in self.eia_series:
 
-        return json_data
+            api_request = self.eia_url + series + sort_value + frequency + api_key
+            r = requests.get(api_request)
+            json_data = r.json()
+
+            temp_list += Updater.dict_to_list(json_data['response']['data'], ['value'])
+
+        return temp_list
+
 
 data = Updater()
 retrieved_data = data.retrieve_data_bls()
 eia_api = data.retrieve_data_eia()
-eia = pd.DataFrame(data.dict_to_list(eia_api['response']['data'], ['value', 'period'])).transpose()
+eia = pd.DataFrame(eia_api).transpose()

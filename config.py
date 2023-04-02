@@ -8,8 +8,9 @@ bls_series = ['APU0000708111', 'APU000072610', 'APU0000709112', 'APU0000702111',
               'APU0000711311', 'APU0000712311', 'CUUR0000SA0']
 bls_series_name = ['eggs', 'electricity', 'milk', 'bread', 'bacon', 'chicken_breast', 'chicken_whole', 'bananas',
                    'rice', 'coffee', 'ground_chuck', 'cookies', 'oranges', 'tomatoes', 'cpi_values']
-eia_series = ['petroleum/pri/spt/data/?']
+eia_series = ['/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCBRENT',
+              '/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCWTI']
 
 url_bls = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'
-url_eia = 'https://api.eia.gov/v2/'
+url_eia = 'https://api.eia.gov/v2'
 
