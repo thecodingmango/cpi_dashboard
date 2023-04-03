@@ -111,31 +111,45 @@ class Updater:
         return bls_df
 
     # Function to retrieve data from the US Energy Information Administration
-    def retrieve_data_eia(self):
+    def retrieve_data_eia(self, eia_series, column_name):
         """
         Used to retrieve data from the US EIA website using an API key
         :return:
         """
 
-        #
-        sort_value = '&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000'
-        frequency = '&frequency=monthly'
-        api_key = '&api_key=' + api_keys.eia_api_key
+        # Setting for the EIA API
+        sort_value = '&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000'  # Sort by descending order
+        frequency = '&frequency=monthly'  # Pull data in monthly interval
+        start_date = '&start=' + str(self.start_year) + '-01'
+        api_key = '&api_key=' + api_keys.eia_api_key  # API key
 
+        # Temporary list to store all the values
         temp_list = []
 
-        for series in self.eia_series:
+        for series in eia_series:
 
-            api_request = self.eia_url + series + sort_value + frequency + api_key
+            api_request = self.eia_url + series + sort_value + frequency + start_date + api_key
             r = requests.get(api_request)
             json_data = r.json()
 
             temp_list += Updater.dict_to_list(json_data['response']['data'], ['value'])
 
-        return temp_list
+        eia_df = pd.DataFrame(temp_list).transpose()
+        eia_df['year_month'] = pd.DataFrame(Updater.dict_to_list(json_data['response']['data'], ['period'])).transpose()
+        eia_df.columns = column_name
+
+        return eia_df
+
+    def fetch_data(self):
+        """
+        Function is to combine the result from both the BLS website and EIA website
+        :return: dataframe of combine result of BLS website and EIA website
+        """
+
+        pass
 
 
 data = Updater()
 retrieved_data = data.retrieve_data_bls()
-eia_api = data.retrieve_data_eia()
-eia = pd.DataFrame(eia_api).transpose()
+eia_api = data.retrieve_data_eia(config.eia_series)
+#eia = pd.DataFrame(eia_api).transpose()
