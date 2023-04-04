@@ -21,9 +21,8 @@ eia_series = ['/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCBREN
               '/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCWTI']
 
 # EIA series name
-eia_series_name = ['uk_brent_prices', 'wti_prices']
+eia_series_name = ['uk_brent_prices', 'wti_prices', 'period']
 
-# EIA series name
 
 # Url for BLS and EIA website
 url_bls = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'

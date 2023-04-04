@@ -11,8 +11,6 @@ import config
 class Updater:
 
     def __init__(self):
-        self.bls_series = config.bls_series
-        self.eia_series = config.eia_series
         self.bls_url = config.url_bls
         self.eia_url = config.url_eia
         self.start_year = config.start_year
@@ -24,7 +22,7 @@ class Updater:
         """
         Function that takes in list of dictionaries and return the values in each of the dictionaries with the specified
         key
-        :param keys: List of keys, m
+        :param keys: List of keys
         :param dicts: List of Dict
         :return: Nested list of items
         """
@@ -86,15 +84,16 @@ class Updater:
         return pd.DataFrame(year_month)
 
     # Function to retrieve data from the US BLS website
-    def retrieve_data_bls(self):
+    def retrieve_data_bls(self, bls_series, bls_series_name):
         """
         Takes in a list of series id and retrieve their data values from the website
         :param: List of series id in strings
         :return: Pandas Dataframe
         """
 
+        # Requesting data through API
         headers = {'Content-type': 'application/json'}
-        data = json.dumps({'seriesid': self.bls_series,
+        data = json.dumps({'seriesid': bls_series,
                            'startyear': self.start_year,
                            'endyear': self.end_year,
                            "registrationkey": api_keys.bls_api_key})
@@ -102,16 +101,18 @@ class Updater:
         p = requests.post(self.bls_url, data=data, headers=headers)
         json_data = json.loads(p.text)
 
-        print(json_data)
-
+        # Get the data from a list of dictionaries into a nested list
+        # Then the nested list is put into a dataframe
         bls_df = Updater.dict_to_df(json_data['Results']['series'], ['data', 'value'])
-        bls_df.columns = config.bls_series_name
+        bls_df.columns = bls_series_name
+
+        # Extract the value date from the series and put it as a new column into the bls df
         bls_df['year_month'] = Updater.bls_parse_date(json_data['Results']['series'][0]['data'])
 
         return bls_df
 
     # Function to retrieve data from the US Energy Information Administration
-    def retrieve_data_eia(self, eia_series, column_name):
+    def retrieve_data_eia(self, eia_series, eia_series_name):
         """
         Used to retrieve data from the US EIA website using an API key
         :return:
@@ -126,6 +127,7 @@ class Updater:
         # Temporary list to store all the values
         temp_list = []
 
+        # Loops through all the series needed, and request the data for each series separately
         for series in eia_series:
 
             api_request = self.eia_url + series + sort_value + frequency + start_date + api_key
@@ -136,20 +138,13 @@ class Updater:
 
         eia_df = pd.DataFrame(temp_list).transpose()
         eia_df['year_month'] = pd.DataFrame(Updater.dict_to_list(json_data['response']['data'], ['period'])).transpose()
-        eia_df.columns = column_name
+        eia_df.columns = eia_series_name
 
         return eia_df
 
-    def fetch_data(self):
-        """
-        Function is to combine the result from both the BLS website and EIA website
-        :return: dataframe of combine result of BLS website and EIA website
-        """
-
-        pass
 
 
 data = Updater()
-retrieved_data = data.retrieve_data_bls()
-eia_api = data.retrieve_data_eia(config.eia_series)
+retrieved_data = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
+eia_api = data.retrieve_data_eia(config.eia_series, config.eia_series_name)
 #eia = pd.DataFrame(eia_api).transpose()
