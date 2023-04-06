@@ -136,12 +136,16 @@ class Updater:
 
             temp_list += Updater.dict_to_list(json_data['response']['data'], ['value'])
 
+        # Converts the list of values into Pandas Dataframe
         eia_df = pd.DataFrame(temp_list).transpose()
+
+        # Get the date period for all the values in the list
         eia_df['year_month'] = pd.DataFrame(Updater.dict_to_list(json_data['response']['data'], ['period'])).transpose()
+
+        # Setting column name for the dataframe
         eia_df.columns = eia_series_name
 
         return eia_df
-
 
 
 data = Updater()

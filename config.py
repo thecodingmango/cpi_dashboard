@@ -17,11 +17,11 @@ bls_series_name = ['eggs', 'electricity', 'milk', 'bread', 'bacon', 'chicken_bre
                    'rice', 'coffee', 'ground_chuck', 'cookies', 'oranges', 'tomatoes', 'cpi_values']
 
 # EIA series ID
-eia_series = ['/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCBRENT',
-              '/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCWTI']
+eia_petroleum_price = ['/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCBRENT',
+                       '/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCWTI']
 
 # EIA series name
-eia_series_name = ['uk_brent_prices', 'wti_prices', 'period']
+eia_petroleum_name = ['uk_brent_prices', 'wti_prices', 'period']
 
 
 # Url for BLS and EIA website
