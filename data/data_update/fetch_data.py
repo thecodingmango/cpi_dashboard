@@ -3,9 +3,9 @@
 # Importing libraries
 import requests
 import json
-import pandas as pd
 import api_keys
 import config
+from data.data_processing.processing_data import *
 
 
 class Updater:
