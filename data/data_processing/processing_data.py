@@ -34,3 +34,23 @@ def check_missing_value(dataframe):
             print('No Missing Value')
 
     return track_missing
+
+
+def check_dtype(dataframe):
+    """
+    Checks if the dataframe for EIA and BLS have the correct data type
+    :param dataframe: Pandas Dataframe
+    Most columns should be numeric with the data type flaot64
+    year_month column should be objects data type
+    :return: Dataframe with the correct data type
+    """
+
+    for column in dataframe.columns:
+
+        if column != 'year_month':
+
+            if dataframe[column].dtypes != 'float64':
+
+                dataframe[column] = pd.to_numeric(dataframe[column])
+
+    return dataframe
