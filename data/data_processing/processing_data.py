@@ -14,6 +14,7 @@ import pandas as pd
 def check_missing_value(dataframe):
     """
     Checks for any missing values for EIA and BLS dataframe
+
     :param dataframe: Pandas dataframe
     :return: List with columns that have missing value
     """
@@ -39,9 +40,11 @@ def check_missing_value(dataframe):
 def check_dtype(dataframe):
     """
     Checks if the dataframe for EIA and BLS have the correct data type
-    :param dataframe: Pandas Dataframe
     Most columns should be numeric with the data type flaot64
     year_month column should be objects data type
+
+    :param dataframe: Pandas Dataframe
+
     :return: Dataframe with the correct data type
     """
 
@@ -54,3 +57,35 @@ def check_dtype(dataframe):
                 dataframe[column] = pd.to_numeric(dataframe[column])
 
     return dataframe
+
+
+def fill_missing_value(dataframe):
+    """
+    Fill the missing Values with mean
+    :param dataframe: Pandas dataframe
+    :return: Dataframe without missing value
+    """
+
+    return dataframe.fillna(dataframe.mean())
+
+
+def data_check(dataframe):
+    """
+    Takes in a dataframe and perform the following checks:
+    - Checks for missing value
+    - Checks data type
+    - Fill missing value (if any)
+    :param dataframe: Pandas dataframe
+    :return: Cleaned Pandas dataframe
+    """
+
+    # Checks data type of the dataframe
+    dataframe = check_dtype(dataframe)
+
+    if len(check_missing_value(dataframe)) > 0:
+
+        # Checking data for any missing values, and fill the missing value with column mean
+        dataframe = fill_missing_value(dataframe)
+
+    return dataframe
+
