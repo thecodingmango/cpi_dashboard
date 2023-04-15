@@ -5,7 +5,7 @@ import requests
 import json
 import api_keys
 import config
-from data.data_processing.processing_data import *
+from data.data_processing.data_checking import *
 
 
 class Updater:
@@ -106,6 +106,9 @@ class Updater:
         bls_df = Updater.dict_to_df(json_data['Results']['series'], ['data', 'value'])
         bls_df.columns = bls_series_name
 
+        # Check the data before returning the dataframe
+        bls_df = data_check(bls_df)
+
         # Extract the value date from the series and put it as a new column into the bls df
         bls_df['year_month'] = Updater.bls_parse_date(json_data['Results']['series'][0]['data'])
 
@@ -142,6 +145,9 @@ class Updater:
         # Setting column name for the dataframe
         eia_df.columns = eia_series_name
 
+        # Check the data before returning the dataframe
+        eia_df = data_check(eia_df)
+
         # Get the date period for all the values in the list
         eia_df['year_month'] = pd.DataFrame(Updater.dict_to_list(json_data['response']['data'], ['period'])).transpose()
 
@@ -149,6 +155,6 @@ class Updater:
 
 
 data = Updater()
-retrieved_data = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
+bls_api = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
 eia_api = data.retrieve_data_eia(config.eia_petroleum_price, config.eia_petroleum_name)
 #eia = pd.DataFrame(eia_api).transpose()
