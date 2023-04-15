@@ -3,24 +3,21 @@ This is a module for building the dashboard inspired from:
 https://realpython.com/python-dash/#get-started-with-dash-in-python
 """
 
-# Importing libraries
+# Import libraries
+import config
+from data.data_update.fetch_data import *
+
 import datetime
 import dash
-import datetime
-from datetime import date
-from dash import dcc
-from dash import Output, Input
 from dash import html
-import pandas as pd
+from dash import dcc
+from dash.dependencies import Input, Output
 
-CPI = pd.read_csv('data/CPI_data_1997_to_2022.csv')
-Energy_Price = pd.read_csv('data/Energy_Prices.csv')
-Oil_Production = pd.read_csv('data/International_PetroleumProduction_Consumption_and_Inventories.csv')
 
-# Merge all data
-all_data = CPI.merge(Energy_Price, how='left', on='DATE').merge(Oil_Production, how='left', on='DATE')
-all_data['DATE'] = pd.to_datetime(all_data['DATE'], format='%Y-%m-%d')
-all_data['DATE'] = [datetime.datetime.strftime(date, '%Y-%m-%d') for date in all_data['DATE']]
+data_api = Updater()
+bls_data = data_api.retrieve_data_bls(config.bls_series, config.bls_series_name)
+crude_spot = data_api.retrieve_data_eia(config.eia_petroleum_price, config.eia_petroleum_name)
+
 
 external_stylesheets = [
     {
