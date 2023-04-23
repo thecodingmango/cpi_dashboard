@@ -115,10 +115,9 @@ class Updater:
         return bls_df
 
     # Function to retrieve data from the US Energy Information Administration
-    def retrieve_data_eia(self, eia_series, eia_series_name):
+    def retrieve_data_eia(self, eia_series, eia_series_name, values):
         """
         Used to retrieve data from the US EIA website using an API key
-        :return:
         """
 
         # Setting for the EIA API
@@ -136,8 +135,9 @@ class Updater:
             api_request = self.eia_url + series + sort_value + frequency + start_date + api_key
             r = requests.get(api_request)
             json_data = r.json()
+            print(json_data)
 
-            temp_list += Updater.dict_to_list(json_data['response']['data'], ['value'])
+            temp_list += Updater.dict_to_list(json_data['response']['data'], values)
 
         # Converts the list of values into Pandas Dataframe
         eia_df = pd.DataFrame(temp_list).transpose()
@@ -154,9 +154,21 @@ class Updater:
         return eia_df
 
 
-# data = Updater()
+data = Updater()
 # bls_api = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
-# eia_api = data.retrieve_data_eia(config.eia_petroleum_price, config.eia_petroleum_name)
+eia_api_petroleum = data.retrieve_data_eia(config.eia_petroleum_price,
+                                           config.eia_petroleum_name,
+                                           ['value'])
+# eia_api_crude = data.retrieve_data_eia(config.eia_crude_import,
+#                                    config.eia_crude_import_name,
+#                                    ['originName', 'destinationName', 'quantity', 'gradeName'])
 # #eia = pd.DataFrame(eia_api).transpose()
-
-
+# r = requests.get('https://api.eia.gov/v2/crude-oil-imports/data/?data[0]=quantity&'
+#                     'facets[originId][]=OPN_N&'
+#                     'facets[originId][]=REG_AF&'
+#                     'facets[originId][]=REG_AP&'
+#                     'facets[originId][]=REG_CA&'
+#                     'facets[originId][]=REG_EU&'
+#                     'facets[originId][]=REG_ME&'
+#                     'facets[destinationType][]=US' + '&api_key='+'yUUgEB17VpR6y6wLao6DCg44YSAtbz0G9vtpfEot')
+# test = r.json()

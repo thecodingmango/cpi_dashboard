@@ -16,12 +16,21 @@ bls_series = ['APU0000708111', 'APU000072610', 'APU0000709112', 'APU0000702111',
 bls_series_name = ['eggs', 'electricity', 'milk', 'bread', 'bacon', 'chicken_breast', 'chicken_whole', 'bananas',
                    'rice', 'coffee', 'ground_chuck', 'cookies', 'oranges', 'tomatoes', 'cpi_values']
 
-# EIA series ID
+# EIA petroleum series
 eia_petroleum_price = ['/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCBRENT',
                        '/petroleum/pri/spt/data/?&data[0]=value&facets[product][]=EPCWTI']
-
-# EIA series name
 eia_petroleum_name = ['uk_brent_prices', 'wti_prices']
+
+# EIA crude oil import series
+eia_crude_import = ['/crude-oil-imports/data/?data[0]=quantity&'
+                    '&facets[originId][]=OPN_N&'
+                    '&facets[originId][]=REG_AF&'
+                    '&facets[originId][]=REG_AP&'
+                    '&facets[originId][]=REG_CA&'
+                    '&facets[originId][]=REG_EU&'
+                    '&facets[originId][]=REG_ME&'
+                    '&facets[destinationType][]=US']
+eia_crude_import_name = ['originName', 'destinationName', 'quantity', 'gradeName']
 
 
 # Url for BLS and EIA website

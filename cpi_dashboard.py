@@ -4,49 +4,12 @@ https://realpython.com/python-dash/#get-started-with-dash-in-python
 """
 
 # Import libraries
-import config
-from data.data_update.fetch_data import *
-
-import datetime
-import dash
-from dash import html
-from dash import dcc
-from dash.dependencies import Input, Output
+import logging
+from layout import app
 
 
-data_api = Updater()
-bls_data = data_api.retrieve_data_bls(config.bls_series, config.bls_series_name)
-crude_spot = data_api.retrieve_data_eia(config.eia_petroleum_price, config.eia_petroleum_name)
 
 
-external_stylesheets = [
-    {
-        "href": "https://fonts.googleapis.com/css2?"
-                "family=Lato:wght@400;700&display=swap",
-        "rel": "stylesheet",
-    }
-]
-
-# Initialize the dash class
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
-app.title = 'CPI Dashboard'
-
-app.layout = html.Div(
-    children=[
-        html.Div(
-            children=[
-                html.H1(
-                    children='CPI DashBoard',
-                    className='header-title'
-                ),
-                html.P(children='Dashboard to Visualize CPI and Different Commodity',
-                       className='header-description')
-            ],
-            className='header'
-        )
-    ]
-)
 
 
 
@@ -265,4 +228,9 @@ app.layout = html.Div(
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+
+    try:
+        app.run_server(debug=True)
+
+    except Exception as e:
+        logging.error(e, exc_info=True)

@@ -52,9 +52,11 @@ def check_dtype(dataframe):
 
         if column != 'year_month':
 
-            if dataframe[column].dtypes != 'float64':
+            if type(dataframe[column][1]) != str:
 
-                dataframe[column] = pd.to_numeric(dataframe[column])
+                if dataframe[column].dtypes != 'float64':
+
+                    dataframe[column] = pd.to_numeric(dataframe[column])
 
     return dataframe
 
