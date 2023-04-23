@@ -32,8 +32,25 @@ eia_crude_import = ['/crude-oil-imports/data/?data[0]=quantity&'
                     '&facets[destinationType][]=US']
 eia_crude_import_name = ['originName', 'destinationName', 'quantity', 'gradeName']
 
+# EIA crude oil production
+eia_crude_production = ['/steo/data/?data[0]=value&facets[seriesId][]=PAPR_US',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_CA',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_MX',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_OPEC',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_FSU',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_CH']
+eia_crude_production_name = ['US', 'CA', 'MX', 'OPEC', 'EURASIA', 'CHINA']
+
+# EIA crude oil consumption
+eia_crude_consumption = ['/steo/data/?data[0]=value&facets[seriesId][]=PATC_US',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CA',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_OECD_EUROPE',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_JA',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_FSU',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_NONOECD_EUROPE',
+                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CH']
+eia_crude_consumption_name = ['US', 'CA', 'OECD_EUROPE', 'JP', 'EURASIA', 'NON_OECD_EUROPE', 'CHINA']
 
 # Url for BLS and EIA website
 url_bls = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'
 url_eia = 'https://api.eia.gov/v2'
-

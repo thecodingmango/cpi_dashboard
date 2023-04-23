@@ -135,7 +135,6 @@ class Updater:
             api_request = self.eia_url + series + sort_value + frequency + start_date + api_key
             r = requests.get(api_request)
             json_data = r.json()
-            print(json_data)
 
             temp_list += Updater.dict_to_list(json_data['response']['data'], values)
 
@@ -154,11 +153,11 @@ class Updater:
         return eia_df
 
 
-data = Updater()
+# data = Updater()
 # bls_api = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
-eia_api_petroleum = data.retrieve_data_eia(config.eia_petroleum_price,
-                                           config.eia_petroleum_name,
-                                           ['value'])
+# eia_api_petroleum = data.retrieve_data_eia(config.eia_petroleum_price,
+#                                            config.eia_petroleum_name,
+#                                            ['value'])
 # eia_api_crude = data.retrieve_data_eia(config.eia_crude_import,
 #                                    config.eia_crude_import_name,
 #                                    ['originName', 'destinationName', 'quantity', 'gradeName'])
