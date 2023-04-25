@@ -8,15 +8,6 @@ import logging
 from layout import app
 
 
-
-
-
-
-
-
-
-
-
 # app.layout = html.Div(
 #     children=[
 #         html.Div(

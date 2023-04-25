@@ -1,3 +1,9 @@
+# app-container * {
+    box-sizing:border-box;
+    -moz-box-sizing: border-box;
+}
+
+
 html {
     font-size: 62.5%;
 }
@@ -38,31 +44,47 @@ body {
     padding: 0 0 0 20px
 }
 
-
-
-.wrapper {
-    margin-right: auto;
-    margin-left: auto;
-    max-width: 1024px;
-    padding-right: 10px;
-    padding-left: 10px;
-    margin-top: 32px;
+.content_wrapper{
+    display: flex;
+    margin-top: 5px;
 }
 
-.card {
-    margin-bottom: 24px;
+.sidebar{
+    position: relative;
+    width: 20%;
+    background-color: #FFFFFF;
+    height:80vh
+}
+
+.wrapper {
+    position: relative;
+    margin: 10px auto;
+    width: 90%;
+    padding: 0px 20px auto;
+    box-sizing: border-box;
+}
+
+.card{
+    position: relative;
+    width: 80%;
+    background-color: #FFFFFF;
     box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 
 .menu {
-    height: 112px;
+    margin-top: 5px;
+    height: 50px;
     width: 500px;
     display: flex;
     justify-content: space-evenly;
-    padding-top: 24px;
-    margin: -50px auto -100 auto;
-    background-color: #FFFFFF;
-    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+    padding-top: 5px;
+    background-color: #D3D3D3;
+}
+
+.menu-title {
+    padding-top: 5px;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .Select-control {
@@ -78,8 +100,3 @@ body {
     line-height: 32px;
 }
 
-.menu-title {
-    margin-bottom: 6px;
-    font-weight: bold;
-    color: #079A82;
-}
