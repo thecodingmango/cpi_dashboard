@@ -11,20 +11,20 @@ html {
 body {
     font-family: "Lato", sans-serif;
     margin: 0;
-    background-color: #D3D3D3;
+    background-color: #696969;
 }
 
 .header {
     background-color: #778899;
-    height: 100px;
-    padding: 8px 0 0 0;
+    height: 75px;
+    padding: 0 0 0 0;
 }
 
 .header-description {
     color: #FFFFFF;
-    font-size: 17px;
+    font-size: 15px;
     font-weight: bold;
-    margin: 10px;
+    margin: 3px;
     text-align: left;
     padding: 0 0 0 22px
 }
@@ -44,21 +44,36 @@ body {
     padding: 0 0 0 20px
 }
 
-.content_wrapper{
-    display: flex;
-    margin-top: 5px;
-}
-
 .sidebar{
     position: relative;
     width: 20%;
     background-color: #FFFFFF;
-    height:80vh
+    height:90vh
+}
+
+.content_wrapper{
+    display: flex;
+    margin-top: 3px;
+}
+
+.main_top{
+    display: flex;
+    justify-content: space-between;
+}
+
+.date_picker_container{
+
+}
+
+.drop_down_menu{
+    width: 250px;
+    margin-left: auto;
+    margin-right: 50px;
 }
 
 .wrapper {
     position: relative;
-    margin: 10px auto;
+    margin: 5px auto;
     width: 90%;
     padding: 0px 20px auto;
     box-sizing: border-box;
@@ -71,32 +86,7 @@ body {
     box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 
-.menu {
-    margin-top: 5px;
-    height: 50px;
-    width: 500px;
-    display: flex;
-    justify-content: space-evenly;
-    padding-top: 5px;
-    background-color: #D3D3D3;
+.cpi_chart_container{
+    position: relative;
+    width: 120%;
 }
-
-.menu-title {
-    padding-top: 5px;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.Select-control {
-    width: 256px;
-    height: 48px;
-}
-
-.Select--single > .Select-control .Select-value, .Select-placeholder {
-    line-height: 48px;
-}
-
-.Select--multi .Select-value-label {
-    line-height: 32px;
-}
-

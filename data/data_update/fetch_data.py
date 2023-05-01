@@ -1,6 +1,8 @@
 """This file is used to retrieve data from the US BLS and US EIA website using their public API"""
 
 # Importing libraries
+from sys import api_version
+
 import requests
 import json
 import api_keys
@@ -76,10 +78,10 @@ class Updater:
         for date in list(zip(*year, *month)):
 
             # Join year and month together and set the date to first day of the month
-            year_month += ['-'.join(date) + '-01']
+            year_month += ['-'.join(date)]
 
-            # Remove letter m in period
-            year_month = [str(item).replace('M', '') for item in year_month]
+        # Remove letter m in period
+        year_month = [str(item).replace('M', '') for item in year_month]
 
         return pd.DataFrame(year_month)
 
@@ -135,7 +137,6 @@ class Updater:
             api_request = self.eia_url + series + sort_value + frequency + start_date + api_key
             r = requests.get(api_request)
             json_data = r.json()
-
             temp_list += Updater.dict_to_list(json_data['response']['data'], values)
 
         # Converts the list of values into Pandas Dataframe

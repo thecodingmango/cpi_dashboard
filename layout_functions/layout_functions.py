@@ -31,13 +31,10 @@ def header():
 def date_picker(data):
 
     range_picker = html.Div(
-        className='menu',
         children=[
-            html.Div(
-                children='Date Range',
-                className='menu-title'),
             dcc.DatePickerRange(
                 id='date_range',
+                className='date_picker_container',
                 min_date_allowed=data['year_month'].min(),
                 max_date_allowed=data['year_month'].max(),
                 start_date=data['year_month'].min(),
@@ -49,10 +46,38 @@ def date_picker(data):
     return range_picker
 
 
-def line_chart():
+def drop_down():
+
+    menu = dcc.Dropdown(
+        id='drop_down_menu',
+        className='drop_down_menu',
+        options=[
+            {'label': 'Commodity Prices', 'value': 'Commodity Prices'},
+            {'label': 'Crude Oil Spot Price', 'value': 'Crude Oil Spot Price'},
+            {'label': 'Crude Oil Production', 'value': 'Crude Oil Production'},
+            {'label': 'Crude Oil Consumption', 'value': 'Crude Oil Consumption'}
+        ],
+        value='Commodity Prices'
+    )
+
+    return menu
+
+
+def cpi_line_graph():
 
     line_graph = dcc.Graph(
-        id='cpi_graph',
+        id='cpi_chart',
+        className='card',
+        config={'displayModeBar': True},
+    )
+
+    return line_graph
+
+
+def line_graph():
+
+    line_graph = dcc.Graph(
+        id='line_chart',
         className='card',
         config={'displayModeBar': True}
     )
