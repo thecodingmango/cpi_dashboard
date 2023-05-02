@@ -58,9 +58,10 @@ app.layout = html.Div(
                         # Date picker section
                         html.Div(
                             className='main_top',
-                            children=[date_picker(bls_data),
-                                      drop_down()
-                                      ]
+                            children=[
+                                date_picker(bls_data),
+                                drop_down()
+                            ]
                         ),
 
                         # CPI chart
@@ -72,6 +73,7 @@ app.layout = html.Div(
 
                         # Other Charts
                         html.Div(
+                            className='line_chart_container',
                             children=[line_graph()]
 
                         )
@@ -83,8 +85,6 @@ app.layout = html.Div(
     ],
     className='wrapper'
 )
-
-
 
 """
 # builing app layout
@@ -107,6 +107,7 @@ app.layout = html.Div(
 )
 """
 
+
 @app.callback(
     [Output('cpi_chart', 'figure'),
      Output('line_chart', 'figure')],
@@ -115,7 +116,6 @@ app.layout = html.Div(
      Input('drop_down_menu', 'value')]
 )
 def update_chart(start_date, end_date, value):
-
     temp_list = []
     filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
     filtered_data_bls = bls_data.loc[filters_date_bls, :]
@@ -125,13 +125,25 @@ def update_chart(start_date, end_date, value):
             {
                 'x': filtered_data_bls['year_month'],
                 'y': filtered_data_bls['cpi_values'],
-                'type': 'lines'
+                'type': 'lines',
+                'name': 'CPI_Values'
             }
         ],
         'layout': {
-            'title':
-                {'text': 'CPI Values Since' + ' ' + start_date,
-                 'x': 0.05},
+            'title': {
+                'text': 'CPI Values Since' + ' ' + start_date,
+                'x': 'center'
+            },
+            'xaxis': {
+                'title': 'Year',
+            },
+            'yaxis': {
+                'title': {'text': 'CPI Values',
+                          'font-size': 'bold'
+                          },
+                'ticksuffix': '%',
+                'font': 'bold'
+            },
             'height': 400
         }
     }
@@ -139,11 +151,30 @@ def update_chart(start_date, end_date, value):
     if value == 'Commodity Prices':
 
         for series in filtered_data_bls.columns[1:-2]:
-            temp_list += [{'x': filtered_data_bls['year_month'], 'y': filtered_data_bls[series], 'type': 'lines', 'name': series}]
+            temp_list += [
+                {'x': filtered_data_bls['year_month'], 'y': filtered_data_bls[series],
+                 'type': 'lines',
+                 'name': series
+                 }
+            ]
 
         line_chart = {
             'data':
                 temp_list
+            ,
+            'layout': {
+                'title': {
+                    'text': 'Comparison of Different Commodity Prices' + ' Since ' + start_date,
+                    'x': 'center'
+                },
+                'xaxis': {
+                    'title': ' Year'
+                },
+                'yaxis': {
+                    'title': ' Prices in USD'
+                },
+                'height': 400
+            }
         }
 
         return [cpi_chart, line_chart]
@@ -155,14 +186,31 @@ def update_chart(start_date, end_date, value):
         eia_petro_price = eia_petroleum_spot.loc[eia_filter, :]
 
         for series in eia_petro_price.columns[1:-1]:
-            temp_list += [{'x': eia_petro_price['year_month'],
-                           'y': eia_petro_price[series],
-                           'type': 'lines',
-                           'name': series}]
+            temp_list += [
+                {
+                    'x': eia_petro_price['year_month'],
+                    'y': eia_petro_price[series],
+                    'type': 'lines',
+                    'name': series
+                }
+            ]
 
         line_chart = {
             'data':
-                temp_list
+                temp_list,
+            'layout': {
+                'title': {
+                    'text': 'Comparison of Crude Oil Spot Prices' + ' Since ' + start_date,
+                    'x': 'center'
+                },
+                'xaxis': {
+                    'title': ' Year'
+                },
+                'yaxis': {
+                    'title': ' Prices USD'
+                },
+                'height': 400
+            }
         }
 
         return [cpi_chart, line_chart]
@@ -174,56 +222,70 @@ def update_chart(start_date, end_date, value):
         eia_oil_production = eia_api_crude_production.loc[eia_filter_production, :]
 
         for series in eia_oil_production.columns[1:-1]:
-
-            temp_list += [{'x': eia_oil_production['year_month'],
-                           'y': eia_oil_production[series],
-                           'type': 'lines',
-                           'name': series}]
+            temp_list += [
+                {
+                    'x': eia_oil_production['year_month'],
+                    'y': eia_oil_production[series],
+                    'type': 'lines',
+                    'name': series
+                }
+            ]
 
         line_chart = {
             'data':
-                temp_list
+                temp_list,
+            'layout': {
+                'title': {
+                    'text': 'Comparison of Different Oil Production Level by Country' + ' Since ' + start_date,
+                    'x': 'center'
+                },
+                'xaxis': {
+                    'title': ' Year'
+                },
+                'yaxis': {
+                    'title': ' Million of Barrel (s)'
+                },
+                'height': 400
+            }
         }
 
         return [cpi_chart, line_chart]
 
     elif value == 'Crude Oil Consumption':
 
-        eia_filter_production = ((eia_api_crude_production['year_month'] >= start_date) &
+        eia_filter_consumption = ((eia_api_crude_consumption['year_month'] >= start_date) &
 
-                                 (eia_api_crude_production['year_month'] <= end_date))
+                                  (eia_api_crude_consumption['year_month'] <= end_date))
 
-        eia_oil_production = eia_api_crude_production.loc[eia_filter_production, :]
+        eia_oil_consumption = eia_api_crude_production.loc[eia_filter_consumption, :]
 
-        for series in eia_oil_production.columns[1:-1]:
-            print(series)
-
-            temp_list += [{'x': eia_oil_production['year_month'],
-
-                           'y': eia_oil_production[series],
-
-                           'type': 'lines',
-
-                           'name': series}]
-
-        print(temp_list)
+        for series in eia_oil_consumption.columns[1:-1]:
+            temp_list += [
+                {
+                    'x': eia_oil_consumption['year_month'],
+                    'y': eia_oil_consumption[series],
+                    'type': 'lines',
+                    'name': series
+                }
+            ]
 
         line_chart = {
-
             'data':
-
-                temp_list
-
+                temp_list,
+            'layout': {
+                'title': {
+                    'text': 'Comparison of Different Oil Consumption Level by Country' + ' Since ' + start_date,
+                    'x': 'center'
+                },
+                'xaxis': {
+                    'title': ' Year'
+                },
+                'yaxis': {
+                    'title': ' Million of Barrel (s)'
+                },
+                'height': 400
+            }
         }
 
         return [cpi_chart, line_chart]
 
-'''
-temp_list = []
-
-for series in eia_api_crude_production.columns[1:-2]:
-    temp_list += [{'x': eia_api_crude_production['year_month'],
-                   'y': eia_api_crude_production[series],
-                   'type': 'lines',
-                   'name': series}]
-'''

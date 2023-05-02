@@ -17,7 +17,7 @@ body {
 .header {
     background-color: #778899;
     height: 75px;
-    padding: 0 0 0 0;
+    text-align: left;
 }
 
 .header-description {
@@ -47,13 +47,15 @@ body {
 .sidebar{
     position: relative;
     width: 20%;
+    margin-right: 2px;
     background-color: #FFFFFF;
     height:90vh
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 
 .content_wrapper{
     display: flex;
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
 .main_top{
@@ -62,6 +64,7 @@ body {
 }
 
 .date_picker_container{
+    font-size: 10px;
 
 }
 
@@ -69,6 +72,7 @@ body {
     width: 250px;
     margin-left: auto;
     margin-right: 50px;
+    font-size: 15px;
 }
 
 .wrapper {
@@ -89,4 +93,11 @@ body {
 .cpi_chart_container{
     position: relative;
     width: 120%;
+    margin-top:10px
+}
+
+.line_chart_container{
+    position: relative;
+    width: 120%;
+    margin-top:10px;
 }

@@ -32,7 +32,6 @@ class Updater:
         list_array = []
 
         for key in keys:
-
             list_item = [item.get(key) for item in dicts]
 
             list_array.append(list_item)
@@ -52,7 +51,6 @@ class Updater:
         temp_list = []
 
         for item in list_dict:
-
             temp_list += Updater.dict_to_list(item[key[0]], [key[1]])
 
         data_df = pd.DataFrame(temp_list).transpose()
@@ -76,7 +74,6 @@ class Updater:
         year_month = []
 
         for date in list(zip(*year, *month)):
-
             # Join year and month together and set the date to first day of the month
             year_month += ['-'.join(date)]
 
@@ -133,7 +130,6 @@ class Updater:
 
         # Loops through all the series needed, and request the data for each series separately
         for series in eia_series:
-
             api_request = self.eia_url + series + sort_value + frequency + start_date + api_key
             r = requests.get(api_request)
             json_data = r.json()
@@ -152,7 +148,6 @@ class Updater:
         eia_df['year_month'] = pd.DataFrame(Updater.dict_to_list(json_data['response']['data'], ['period'])).transpose()
 
         return eia_df
-
 
 # data = Updater()
 # bls_api = data.retrieve_data_bls(config.bls_series, config.bls_series_name)

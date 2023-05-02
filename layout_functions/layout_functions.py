@@ -7,7 +7,6 @@ from dash.dependencies import Input, Output
 
 
 def header():
-
     header_layout = html.Div(
         id='header',
         className='header',
@@ -19,7 +18,7 @@ def header():
                         className='header-title'
                     ),
                     html.H2(children='Visualizing CPI and Different Commodity',
-                           className='header-description')
+                            className='header-description')
                 ],
             )
         ]
@@ -29,7 +28,6 @@ def header():
 
 
 def date_picker(data):
-
     range_picker = html.Div(
         children=[
             dcc.DatePickerRange(
@@ -38,7 +36,8 @@ def date_picker(data):
                 min_date_allowed=data['year_month'].min(),
                 max_date_allowed=data['year_month'].max(),
                 start_date=data['year_month'].min(),
-                end_date=data['year_month'].max()
+                end_date=data['year_month'].max(),
+                initial_visible_month=data['year_month'].max()
             )
         ]
     )
@@ -47,7 +46,6 @@ def date_picker(data):
 
 
 def drop_down():
-
     menu = dcc.Dropdown(
         id='drop_down_menu',
         className='drop_down_menu',
@@ -64,7 +62,6 @@ def drop_down():
 
 
 def cpi_line_graph():
-
     line_graph = dcc.Graph(
         id='cpi_chart',
         className='card',
@@ -75,7 +72,6 @@ def cpi_line_graph():
 
 
 def line_graph():
-
     line_graph = dcc.Graph(
         id='line_chart',
         className='card',
@@ -83,4 +79,3 @@ def line_graph():
     )
 
     return line_graph
-

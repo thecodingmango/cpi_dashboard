@@ -45,12 +45,12 @@ eia_crude_production_name = ['US', 'CA', 'MX', 'OPEC', 'EURASIA', 'CHINA']
 
 # EIA crude oil consumption
 eia_crude_consumption = ['/steo/data/?data[0]=value&facets[seriesId][]=PATC_US',
-                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CA',
-                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_OECD_EUROPE',
-                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_JA',
-                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_FSU',
-                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_NONOECD_EUROPE',
-                        '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CH']
+                         '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CA',
+                         '/steo/data/?data[0]=value&facets[seriesId][]=PATC_OECD_EUROPE',
+                         '/steo/data/?data[0]=value&facets[seriesId][]=PATC_JA',
+                         '/steo/data/?data[0]=value&facets[seriesId][]=PATC_FSU',
+                         '/steo/data/?data[0]=value&facets[seriesId][]=PATC_NONOECD_EUROPE',
+                         '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CH']
 eia_crude_consumption_name = ['US', 'CA', 'OECD_EUROPE', 'JP', 'EURASIA', 'NON_OECD_EUROPE', 'CHINA']
 
 # Url for BLS and EIA website

@@ -87,9 +87,7 @@ def data_check(dataframe):
     dataframe = check_dtype(dataframe)
 
     if len(check_missing_value(dataframe)) > 0:
-
         # Checking data for any missing values, and fill the missing value with column mean
         dataframe = fill_missing_value(dataframe)
 
     return dataframe
-
