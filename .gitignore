@@ -8,3 +8,4 @@
 .venv
 /api_keys.py
 *.pyc
+/archived_code.py

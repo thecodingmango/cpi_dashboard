@@ -1,6 +1,8 @@
 """This file is used to retrieve data from the US BLS and US EIA website using their public API"""
 
 # Importing libraries
+from sys import api_version
+
 import requests
 import json
 import api_keys
@@ -30,7 +32,6 @@ class Updater:
         list_array = []
 
         for key in keys:
-
             list_item = [item.get(key) for item in dicts]
 
             list_array.append(list_item)
@@ -50,7 +51,6 @@ class Updater:
         temp_list = []
 
         for item in list_dict:
-
             temp_list += Updater.dict_to_list(item[key[0]], [key[1]])
 
         data_df = pd.DataFrame(temp_list).transpose()
@@ -74,12 +74,11 @@ class Updater:
         year_month = []
 
         for date in list(zip(*year, *month)):
-
             # Join year and month together and set the date to first day of the month
-            year_month += ['-'.join(date) + '-01']
+            year_month += ['-'.join(date)]
 
-            # Remove letter m in period
-            year_month = [str(item).replace('M', '') for item in year_month]
+        # Remove letter m in period
+        year_month = [str(item).replace('M', '') for item in year_month]
 
         return pd.DataFrame(year_month)
 
@@ -115,10 +114,9 @@ class Updater:
         return bls_df
 
     # Function to retrieve data from the US Energy Information Administration
-    def retrieve_data_eia(self, eia_series, eia_series_name):
+    def retrieve_data_eia(self, eia_series, eia_series_name, values):
         """
         Used to retrieve data from the US EIA website using an API key
-        :return:
         """
 
         # Setting for the EIA API
@@ -132,12 +130,10 @@ class Updater:
 
         # Loops through all the series needed, and request the data for each series separately
         for series in eia_series:
-
             api_request = self.eia_url + series + sort_value + frequency + start_date + api_key
             r = requests.get(api_request)
             json_data = r.json()
-
-            temp_list += Updater.dict_to_list(json_data['response']['data'], ['value'])
+            temp_list += Updater.dict_to_list(json_data['response']['data'], values)
 
         # Converts the list of values into Pandas Dataframe
         eia_df = pd.DataFrame(temp_list).transpose()
@@ -153,8 +149,21 @@ class Updater:
 
         return eia_df
 
-
-data = Updater()
-bls_api = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
-eia_api = data.retrieve_data_eia(config.eia_petroleum_price, config.eia_petroleum_name)
-#eia = pd.DataFrame(eia_api).transpose()
+# data = Updater()
+# bls_api = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
+# eia_api_petroleum = data.retrieve_data_eia(config.eia_petroleum_price,
+#                                            config.eia_petroleum_name,
+#                                            ['value'])
+# eia_api_crude = data.retrieve_data_eia(config.eia_crude_import,
+#                                    config.eia_crude_import_name,
+#                                    ['originName', 'destinationName', 'quantity', 'gradeName'])
+# #eia = pd.DataFrame(eia_api).transpose()
+# r = requests.get('https://api.eia.gov/v2/crude-oil-imports/data/?data[0]=quantity&'
+#                     'facets[originId][]=OPN_N&'
+#                     'facets[originId][]=REG_AF&'
+#                     'facets[originId][]=REG_AP&'
+#                     'facets[originId][]=REG_CA&'
+#                     'facets[originId][]=REG_EU&'
+#                     'facets[originId][]=REG_ME&'
+#                     'facets[destinationType][]=US' + '&api_key='+'yUUgEB17VpR6y6wLao6DCg44YSAtbz0G9vtpfEot')
+# test = r.json()

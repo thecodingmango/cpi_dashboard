@@ -1,13 +1,32 @@
+# app-container * {
+    box-sizing:border-box;
+    -moz-box-sizing: border-box;
+}
+
+
+html {
+    font-size: 62.5%;
+}
+
 body {
     font-family: "Lato", sans-serif;
     margin: 0;
-    background-color: #F7F7F7;
+    background-color: #696969;
 }
 
 .header {
-    background-color: #222222;
-    height: 144px;
-    padding: 16px 0 0 0;
+    background-color: #778899;
+    height: 75px;
+    text-align: left;
+}
+
+.header-description {
+    color: #FFFFFF;
+    font-size: 15px;
+    font-weight: bold;
+    margin: 3px;
+    text-align: left;
+    padding: 0 0 0 22px
 }
 
 .header-emoji {
@@ -18,59 +37,67 @@ body {
 
 .header-title {
     color: #FFFFFF;
-    font-size: 48px;
+    font-size: 32px;
     font-weight: bold;
-    text-align: center;
-    margin: 0 auto;
+    text-align: left;
+    margin: 8px;
+    padding: 0 0 0 20px
 }
 
-.header-description {
-    color: #CFCFCF;
-    margin: 4px auto;
-    text-align: center;
-    max-width: 500px;
-}
-
-.wrapper {
-    margin-right: auto;
-    margin-left: auto;
-    max-width: 1024px;
-    padding-right: 10px;
-    padding-left: 10px;
-    margin-top: 32px;
-}
-
-.card {
-    margin-bottom: 24px;
+.sidebar{
+    position: relative;
+    width: 20%;
+    margin-right: 2px;
+    background-color: #FFFFFF;
+    height:90vh
     box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 
-.menu {
-    height: 112px;
-    width: 500px;
+.content_wrapper{
     display: flex;
-    justify-content: space-evenly;
-    padding-top: 24px;
-    margin: -50px auto -100 auto;
+    margin-top: 2px;
+}
+
+.main_top{
+    display: flex;
+    justify-content: space-between;
+}
+
+.date_picker_container{
+    font-size: 10px;
+
+}
+
+.drop_down_menu{
+    width: 250px;
+    margin-left: auto;
+    margin-right: 50px;
+    font-size: 15px;
+}
+
+.wrapper {
+    position: relative;
+    margin: 5px auto;
+    width: 90%;
+    padding: 0px 20px auto;
+    box-sizing: border-box;
+}
+
+.card{
+    position: relative;
+    width: 80%;
     background-color: #FFFFFF;
     box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 
-.Select-control {
-    width: 256px;
-    height: 48px;
+.cpi_chart_container{
+    position: relative;
+    width: 120%;
+    margin-top:10px
 }
 
-.Select--single > .Select-control .Select-value, .Select-placeholder {
-    line-height: 48px;
-}
-
-.Select--multi .Select-value-label {
-    line-height: 32px;
-}
-
-.menu-title {
-    margin-bottom: 6px;
-    font-weight: bold;
-    color: #079A82;
+.line_chart_container{
+    position: relative;
+    width: 120%;
+    margin-top:10px;
 }
