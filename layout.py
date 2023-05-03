@@ -244,7 +244,7 @@ def update_chart(start_date, end_date, value):
 
                                   (eia_api_crude_consumption['year_month'] <= end_date))
 
-        eia_oil_consumption = eia_api_crude_production.loc[eia_filter_consumption, :]
+        eia_oil_consumption = eia_api_crude_consumption.loc[eia_filter_consumption, :]
 
         for series in eia_oil_consumption.columns[1:-1]:
             temp_list += [
