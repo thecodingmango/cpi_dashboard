@@ -96,28 +96,6 @@ app.layout = html.Div(
     className='wrapper'
 )
 
-"""
-# builing app layout
-app.layout = html.Div(
-    children=[
-        header(),
-        html.Div(
-            date_picker(bls_data)
-        ),
-        html.Div(
-            children=[
-                dcc.Graph(
-                    id='cpi_chart',
-                    className='card',
-                    config={'displayModeBar': True}
-                )
-            ]
-        )
-    ]
-)
-"""
-
-
 @app.callback(
     [Output('cpi_chart', 'figure'),
      Output('line_chart', 'figure')],
