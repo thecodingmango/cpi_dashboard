@@ -9,7 +9,7 @@ but there are plans to include other data such as food prices.
 
 More information of the dashboard can be found here: https://thecodingmango.com/python-dashboard-with-dash/
   
-The Dashboard is available here: https://cpi-dashboard-tjdc.onrender.com/  
+The Dashboard is deployed on render available here: https://cpi-dashboard-tjdc.onrender.com/  
 
 
 ## Data

@@ -1,5 +1,4 @@
 import dash
-import config
 from layout_functions.layout_functions import *
 from data.data_update.fetch_data import *
 
