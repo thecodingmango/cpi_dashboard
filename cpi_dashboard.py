@@ -4,7 +4,6 @@ https://realpython.com/python-dash/#get-started-with-dash-in-python
 """
 
 # Import libraries
-import logging
 from layout import app
 
 

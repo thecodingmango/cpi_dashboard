@@ -49,7 +49,17 @@ app.layout = html.Div(
                 html.Div(
                     id='sidebar',
                     className='sidebar',
-                    children=['this is a side bar']
+                    children=[
+                        dcc.Markdown('''
+                        ## About this Project
+                        This project is a dashboard for visualizing the CPI levels and different
+                        prices. 
+                        
+                        Full Code: [Github](https://github.com/thecodingmango/cpi_dashboard)
+                        
+                        Website: [TheCodingMango](https://thecodingmango.com/)
+                    ''')
+                    ]
                 ),
                 html.Div(
                     id='main',
@@ -288,4 +298,3 @@ def update_chart(start_date, end_date, value):
         }
 
         return [cpi_chart, line_chart]
-
