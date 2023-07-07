@@ -8,6 +8,8 @@ Things to check:
  - Filling any missing values
 """
 import pandas as pd
+
+
 def check_missing_value(dataframe):
     """
     Checks for any missing values for EIA and BLS dataframe

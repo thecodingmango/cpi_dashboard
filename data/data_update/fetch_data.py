@@ -71,7 +71,7 @@ class Updater:
             r = requests.get(api_request)
             json_data = r.json()
 
-            temp_list += misc_func.dict_to_list(json_data['response']['data'], ['value'])
+            temp_list += misc_func.dict_to_list(json_data['response']['data'], 'value')
 
         # Converts the list of values into Pandas Dataframe
         eia_df = pd.DataFrame(temp_list).transpose()
@@ -83,7 +83,7 @@ class Updater:
         eia_df = data_check(eia_df)
 
         # Get the date period for all the values in the list
-        eia_df['year_month'] = pd.DataFrame(misc_func.dict_to_list(json_data['response']['data'], ['period'])).transpose()
+        eia_df['year_month'] = pd.DataFrame(misc_func.dict_to_list(json_data['response']['data'], 'period')).transpose()
 
         return eia_df
 
