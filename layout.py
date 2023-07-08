@@ -57,6 +57,12 @@ app.layout = html.Div(
                         Full Code: [Github](https://github.com/thecodingmango/cpi_dashboard)
                         
                         Website: [TheCodingMango](https://thecodingmango.com/)
+                        
+                        Retrieving Data using EIA API: [How to Retrieve Data from the EIA Website](https://thecodingmango.com/updating-data-for-cpi-dashboard-part-2/)
+                        
+                        Retrieving Data using BLS API: [How to Retrieve Data from the BLS Website](https://thecodingmango.com/updating-data-for-cpi-dashboard-part-1/)
+                        
+                        Building a Python Dashboard with Dash: [How to Build a Dashboard with Python Dash](https://thecodingmango.com/rebuilding-the-cpi-dashboard-layout/)
                     ''')
                     ]
                 ),

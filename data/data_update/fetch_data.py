@@ -92,7 +92,7 @@
 #         return eia_df
 #
 #
-# data = Updater()
+# #data = Updater()
 # # bls_api = data.retrieve_data_bls(config.bls_series, config.bls_series_name)
-# eia_api = data.retrieve_data_eia(config.eia_petroleum_price, config.eia_petroleum_name)
+# #eia_api = data.retrieve_data_eia(config.eia_petroleum_price, config.eia_petroleum_name)
 # #eia = pd.DataFrame(eia_api).transpose()
