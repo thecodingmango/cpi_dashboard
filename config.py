@@ -1,4 +1,4 @@
-# Settings for global variables
+# Settings for API
 from datetime import datetime
 
 # Start year is current year - 19 years
