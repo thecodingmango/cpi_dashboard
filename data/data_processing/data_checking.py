@@ -7,7 +7,6 @@ Things to check:
  - Checking for correct data type
  - Filling any missing values
 """
-
 import pandas as pd
 
 
