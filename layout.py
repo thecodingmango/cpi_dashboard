@@ -214,12 +214,26 @@ def update_chart(start_date, end_date, value):
         return [chart_layout, table_data]
 
 
-    elif value == 'Crude Oil Spot Price':
-        pass
+    elif value == 'Energy Dependence':
+        chart_layout = [
+            html.Div(dcc.Markdown('''Work in Progress'''))
+        ]
 
-    elif value == 'Crude Oil Production':
-        pass
+        return [chart_layout, table_data]
 
-    elif value == 'Crude Oil Consumption':
-        pass
+    elif value == 'Forecasting':
+
+        chart_layout = [
+            html.Div(dcc.Markdown('''Work in Progress'''))
+        ]
+
+        return [chart_layout, table_data]
+
+    elif value == 'Consumer Spending':
+
+        chart_layout = [
+            html.Div(dcc.Markdown('''Work in Progress'''))
+        ]
+
+        return [chart_layout, table_data]
 

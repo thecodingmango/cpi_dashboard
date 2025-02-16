@@ -58,10 +58,10 @@ def drop_down():
         id='drop_down_menu',
         className='drop_down_menu',
         options=[
-            {'label': 'Commodity Trends', 'value': 'Commodity Prices'},
-            {'label': 'Crude Oil Spot Price', 'value': 'Crude Oil Spot Price'},
-            {'label': 'Crude Oil Production', 'value': 'Crude Oil Production'},
-            {'label': 'Crude Oil Consumption', 'value': 'Crude Oil Consumption'}
+            {'label': 'Inflation & Energy Prices', 'value': 'Commodity Prices'},
+            {'label': 'Energy Dependence by Region', 'value': 'Energy Dependence'},
+            {'label': 'CPI & Oil Price Forecasting', 'value': 'Forecasting'},
+            {'label': 'Consumer Spending and CPI', 'value': 'Consumer Spending'}
         ],
         value='Commodity Prices',
         clearable=False
