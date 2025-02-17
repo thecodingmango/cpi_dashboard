@@ -2,7 +2,6 @@ import pandas as pd
 import dash
 from dash import dash_table
 from layout_functions.layout_functions import *
-from data.data_update.fetch_data import *
 from datetime import datetime, timedelta
 
 # Using apis to import data
@@ -26,7 +25,7 @@ eia_api_crude_consumption = data_api.retrieve_data_eia(config.eia_crude_consumpt
 
 bls_data = pd.read_csv('./data/bls_data.csv')
 eia_petroleum_spot = pd.read_csv('./data/eia_crude_price.csv')
-eia_api_crude_production = pd.read_csv('./data/eia_crude_production.csv')
+eia_api_crude_production = pd.read_csv('./data/eia_prod_data.csv')
 eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
 
 external_stylesheets = [
@@ -199,7 +198,7 @@ def update_chart(start_date, end_date, value):
         fig_crude_consumption = go.Figure()
         for item in eia_oil_consumption.columns[1:-1]:
             line_graph(fig_crude_consumption, eia_oil_consumption, 'year_month', item,
-                       'Annual Crude Oil Consumed by Country','Year',
+                       'Annual Refined Petroleum Products Consumed by Country','Year',
                        'Million(s) Barrel')
 
         chart_layout = [
