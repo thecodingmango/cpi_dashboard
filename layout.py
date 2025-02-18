@@ -232,9 +232,6 @@ def update_chart(start_date, end_date, value):
         ]
 
     elif value == 'Energy Dependence':
-        # TODO: First plot is map of production, second plot is map of consumption
-        #    Bar plot for consumption by region and production by region
-        #    Line
 
         chart_layout.clear()
         fig_production = map_graph(eia_api_crude_production,
