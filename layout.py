@@ -100,10 +100,11 @@ app.layout = html.Div(
                         ),
 
                         # CPI chart
-                        html.Div(dcc.Loading(type='circle',children=[
-                            html.Div(
-                            id = 'charts_container',
-                            className='cpi_chart_container')
+                        html.Div(
+                            dcc.Loading(type='circle', children=[
+                                html.Div(
+                                    id='charts_container',
+                                    className='cpi_chart_container')
                         ])
                         )
                     ]
@@ -197,7 +198,7 @@ def update_chart(start_date, end_date, value):
         fig_commodity = go.Figure()
         for item in filtered_data_bls.columns[1:-4]:
             line_graph(fig_commodity, filtered_data_bls, 'year_month', item,
-                       'Food Price Since ' + start_date, 'Year', 'Price in USD')
+                       'Average Food Price Since ' + start_date, 'Year', 'Price in USD')
 
         fig_crude_price = go.Figure()
         # for item in eia_petro_price.columns[1:-1]:
@@ -236,12 +237,21 @@ def update_chart(start_date, end_date, value):
 
         chart_layout.clear()
         fig_production = map_graph(eia_api_crude_production,
-                                   'Production Barrels/Year', 'Global Crude Oil Production Over Time')
+                                   'Million Barrels/Day',
+                                   'Global Heatmap of Crude Oil Production Over Time')
         fig_consumption = map_graph(eia_api_crude_consumption,
-                                    'Production Barrels/Year', 'Global Crude Oil Consumption Over Time')
+                                    'Million Barrels/Day',
+                                    'Global Heatmap of Crude Oil Consumption Over Time')
 
-        fig_bar_prod = horizontal_bar_chart(eia_api_crude_production, 'Production')
-        fig_bar_cons = horizontal_bar_chart(eia_api_crude_consumption, 'Consumption')
+        fig_bar_prod = horizontal_bar_chart(eia_api_crude_production, 'Million Barrels/Day',
+                                            title='Bar Chart of Crude Oil Production',
+                                            x_axis='Crude Oil Production Million Barrels/Year',
+                                            y_axis='Region')
+        fig_bar_cons = horizontal_bar_chart(eia_api_crude_consumption, 'Million Barrels/Day',
+                                            title='Bar Chart of Crude Oil Consumption',
+                                            x_axis='Crude Oil Production Million Barrels/Year',
+                                            y_axis='Region'
+                                            )
 
         chart_layout = [
             html.Div(dcc.Markdown('''
@@ -255,7 +265,6 @@ def update_chart(start_date, end_date, value):
 
             ])
         ]
-
 
 
     elif value == 'Forecasting':

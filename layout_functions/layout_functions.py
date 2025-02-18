@@ -64,7 +64,7 @@ def drop_down():
             {'label': 'Inflation & Energy Prices', 'value': 'Commodity Prices'},
             {'label': 'Energy Dependence by Region', 'value': 'Energy Dependence'},
             {'label': 'CPI & Oil Price Forecasting', 'value': 'Forecasting'},
-            {'label': 'Consumer Spending and CPI', 'value': 'Consumer Spending'}
+            #{'label': 'Consumer Spending and CPI', 'value': 'Consumer Spending'}
         ],
         value='Commodity Prices',
         clearable=False
@@ -98,7 +98,6 @@ def line_graph(fig, data,x, y, title = None, x_axis=None, y_axis=None):
 def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis=None, y2_axis=None):
 
     for item in y1:
-        print(data[item])
         fig.add_trace(go.Scatter(
             x=data[x],
             y=data[item],
@@ -108,7 +107,6 @@ def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis
         ))
 
     for item in y2:
-        print(item)
         fig.add_trace(go.Scatter(
             x=data[x],
             y=data[item],
@@ -142,7 +140,7 @@ def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis
     return fig
 
 
-def horizontal_bar_chart(df, prod_cons,orientation=None):
+def horizontal_bar_chart(df, prod_cons,orientation=None, title=None, x_axis=None, y_axis=None):
 
     # Convert year_month into year
     df['year'] = df['year_month'].str[:4]
@@ -153,34 +151,40 @@ def horizontal_bar_chart(df, prod_cons,orientation=None):
 
     df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], value_name=prod_cons)
     df_long = df_long.sort_values(by=['year', prod_cons], ascending=[True, True])
+    df_long[prod_cons] = df_long[prod_cons]/12
 
-    global_min = df_long[prod_cons].min()
+    # Then take the average = average barrels of oil per day
+
     global_max = df_long[prod_cons].max()
 
     fig = px.bar(
         df_long,
         x=df_long[prod_cons],
         y=df_long['variable'],
+        title=title,
         orientation='h',
+        hover_name='variable',
+        hover_data=prod_cons,
         animation_frame='year',
-        animation_group='variable',
-        range_x = [0, 500],
         color=prod_cons,
-        range_color=[global_min, global_max]
+        range_color=[0, global_max],
+        range_x=[0, global_max]
     )
 
     fig.update_layout(
-        xaxis_title="Crude Oil Production in Million Barrels/Year",
-        yaxis_title="Category",
+        xaxis_title=x_axis,
+        yaxis_title=y_axis,
         plot_bgcolor='#252a3b',
         paper_bgcolor='#1E1E2F',
         font=dict(color='white'),
+        transition={"duration": 500, "easing": "cubic-in-out"}
     )
 
     return fig
 
 
 def classify_country(df, prod_cons):
+
     oecd = [
         "Australia", "Austria", "Belgium", "Chile", "Colombia", "Costa Rica",
         "Czech Republic", "Denmark", "Estonia", "Finland", "France",
@@ -239,7 +243,8 @@ def classify_country(df, prod_cons):
 
     # Reshape data into long format
     df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], var_name='Group', value_name=prod_cons)
-    df_long[prod_cons] = df_long[prod_cons] * 1000000
+    df_long[prod_cons] = df_long[prod_cons]/12
+
 
     # This is for handling dataframe having different datasets
     expanded_rows = []
@@ -263,7 +268,6 @@ def classify_country(df, prod_cons):
 
 def map_graph(df, prod_cons, title):
 
-    global_min = classify_country(df, prod_cons)[prod_cons].min()
     global_max = classify_country(df, prod_cons)[prod_cons].max()
 
     fig = px.choropleth(
@@ -275,8 +279,7 @@ def map_graph(df, prod_cons, title):
         hover_data={'Group': True, prod_cons: True},
         title=title,
         animation_frame='year',
-        range_color=[global_min, global_max],
-
+        range_color=[0, global_max]
     )
 
     # Apply full dark theme styling and remove excess space
