@@ -26,12 +26,8 @@ eia_api_crude_consumption = data_api.retrieve_data_eia(config.eia_crude_consumpt
 bls_data = pd.read_csv('./data/bls_food.csv')
 bls_gas =pd.read_csv('./data/bls_gas_price.csv')
 eia_petroleum_spot = pd.read_csv('./data/eia_crude_price.csv')
-eia_api_crude_production = pd.read_csv('./data/eia_prod_data.csv')
-eia_api_crude_production.columns = ['','Canada', 'China', 'Mexico', 'NON_OECD',
-                                    'OECD', 'OPEC','Russia', 'United States', 'year_month']
+eia_api_crude_production = pd.read_csv('./data/eia_crude_production.csv')
 eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
-eia_api_crude_consumption.columns = ['', 'United States', 'Canada', 'OECD_EUROPE', 'Japan', 'EURASIA',
-                                     'NON_OECD_EUROPE', 'China', 'year_month']
 
 
 external_stylesheets = [
@@ -180,6 +176,8 @@ def update_chart(start_date, end_date, value):
 
     table_data = [
         {'metric': 'CPI Values', **get_summary(bls_data, 'Cpi Values')},
+        {'metric': 'PPI Values', **get_summary(bls_data, 'PPI Values')},
+        {'metric': 'Unemployment Rate', **get_summary(bls_data, 'Unemployment')},
         *[{'metric': item, **get_summary(bls_data, item)} for item in filtered_data_bls.columns[1:-4]],
         *[{'metric': item, **get_summary(eia_petroleum_spot, item)} for item in eia_petro_price.columns[1:-1]]
     ]
@@ -189,14 +187,17 @@ def update_chart(start_date, end_date, value):
         chart_layout.clear()
 
         fig_cpi = go.Figure()
-        fig_cpi = line_graph(fig_cpi, filtered_data_bls, 'year_month', 'Cpi Values')
-        fig_cpi = line_graph(fig_cpi, filtered_data_bls, 'year_month', 'PPI Values',
-                             'CPI & PPI Values Since ' + start_date, 'Year', 'Values (%)')
+        # fig_cpi = line_graph(fig_cpi, filtered_data_bls, 'year_month', 'Cpi Values')
+        # fig_cpi = line_graph(fig_cpi, filtered_data_bls, 'year_month', 'PPI Values',
+        #                      'CPI & PPI Values Since ' + start_date, 'Year', 'Values (%)')
+        dual_axis_line_chart(fig_cpi, filtered_data_bls, x='year_month', y1=['Cpi Values', 'PPI Values'],
+                             y2=['Unemployment'], title='CPI, PPI, Unemployment Values Since ' + start_date,
+                             x_axis='Year', y1_axis='Values (%)', y2_axis='Unemployment Rate (%)')
 
         fig_commodity = go.Figure()
         for item in filtered_data_bls.columns[1:-4]:
             line_graph(fig_commodity, filtered_data_bls, 'year_month', item,
-                       'Commodity Price Since ' + start_date, 'Year', 'Price in USD')
+                       'Food Price Since ' + start_date, 'Year', 'Price in USD')
 
         fig_crude_price = go.Figure()
         # for item in eia_petro_price.columns[1:-1]:
@@ -239,12 +240,20 @@ def update_chart(start_date, end_date, value):
         fig_consumption = map_graph(eia_api_crude_consumption,
                                     'Production Barrels/Year', 'Global Crude Oil Consumption Over Time')
 
+        fig_bar_prod = horizontal_bar_chart(eia_api_crude_production, 'Production')
+        fig_bar_cons = horizontal_bar_chart(eia_api_crude_consumption, 'Consumption')
+
         chart_layout = [
             html.Div(dcc.Markdown('''
-                    
+                    # Talk about this page
                     ''')),
             html.Div(children=[dcc.Graph(figure=fig_production, className='map'),
-                               dcc.Graph(figure=fig_consumption, className='map')])
+                               dcc.Graph(figure=fig_consumption, className='map')]),
+            html.Div(children=[
+                dcc.Graph(figure=fig_bar_prod, className='half_card'),
+                dcc.Graph(figure=fig_bar_cons, className='half_card')
+
+            ])
         ]
 
 

@@ -55,19 +55,25 @@ eia_crude_production = [
     '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_CA',
     '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_MX',
     '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_OPEC',
-    '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_FSU',
+    '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_NONOECD',
+    '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_OECD',
+    '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_RS',
     '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_CH'
 ]
-eia_crude_production_name = ['United States', 'Canada', 'Mexico', 'OPEC', 'EURASIA', 'CHINA']
+eia_crude_production_name = ['United States', 'Canada', 'Mexico', 'OPEC', 'Non-OECD', 'OECD','Russia', 'China']
 
 # EIA crude oil consumption
 eia_crude_consumption = [
     '/steo/data/?data[0]=value&facets[seriesId][]=PATC_US',
     '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CA',
-    '/steo/data/?data[0]=value&facets[seriesId][]=PATC_OECD_EUROPE',
-    '/steo/data/?data[0]=value&facets[seriesId][]=PATC_JA',
-    '/steo/data/?data[0]=value&facets[seriesId][]=PATC_FSU',
-    '/steo/data/?data[0]=value&facets[seriesId][]=PATC_NONOECD_EUROPE',
+    '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_MX',
+    '/steo/data/?data[0]=value&facets[seriesId][]=PATC_NON_OECD',
+    '/steo/data/?data[0]=value&facets[seriesId][]=PATC_OECD',
+    '/steo/data/?data[0]=value&facets[seriesId][]=PAPR_RS',
     '/steo/data/?data[0]=value&facets[seriesId][]=PATC_CH'
 ]
-eia_crude_consumption_name = ['United States', 'Canada', 'OECD_EUROPE', 'JP', 'EURASIA', 'NON_OECD_EUROPE', 'CHINA']
+eia_crude_consumption_name = ['United States', 'Canada', 'Mexico','Non-OECD', 'OECD', 'Russia', 'China']
+
+# Total CO2 Emission from Petroleum and other liquid products
+eia_petro_emission = ['/steo/data/?data[0]=value&facets[seriesId][]=PATCCO2']
+eia_petro_emission_name = ['CO2 Emission from Petroleum Products']

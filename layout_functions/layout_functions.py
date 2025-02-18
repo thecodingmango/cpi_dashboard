@@ -5,6 +5,7 @@ from dash import dcc
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
+from numpy.ma.core import resize
 
 
 def header():
@@ -119,6 +120,7 @@ def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis
     # Update layout for dual axes
     fig.update_layout(
         title=title,
+        autosize=True,
         xaxis=dict(title=x_axis),
         yaxis=dict(
             title=y1_axis,
@@ -131,7 +133,7 @@ def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis
             side="right",
             showgrid=False
         ),
-        legend=dict(x=1.2, y=1),
+        legend=dict(title='Legend',x=1.2, y=1),
         plot_bgcolor="#252a3b",
         paper_bgcolor="#1E1E2F",
         font=dict(color="white")
@@ -139,18 +141,55 @@ def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis
 
     return fig
 
+
+def horizontal_bar_chart(df, prod_cons,orientation=None):
+
+    # Convert year_month into year
+    df['year'] = df['year_month'].str[:4]
+
+
+    # Aggregate data by year
+    df = df.iloc[:, 1:].groupby(['year']).sum().reset_index()
+
+    df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], value_name=prod_cons)
+    df_long = df_long.sort_values(by=['year', prod_cons], ascending=[True, True])
+
+    global_min = df_long[prod_cons].min()
+    global_max = df_long[prod_cons].max()
+
+    fig = px.bar(
+        df_long,
+        x=df_long[prod_cons],
+        y=df_long['variable'],
+        orientation='h',
+        animation_frame='year',
+        animation_group='variable',
+        range_x = [0, 500],
+        color=prod_cons,
+        range_color=[global_min, global_max]
+    )
+
+    fig.update_layout(
+        xaxis_title="Crude Oil Production in Million Barrels/Year",
+        yaxis_title="Category",
+        plot_bgcolor='#252a3b',
+        paper_bgcolor='#1E1E2F',
+        font=dict(color='white'),
+    )
+
+    return fig
+
+
 def classify_country(df, prod_cons):
-
-    oecd =  [
-    "Australia", "Austria", "Belgium", "Chile", "Colombia", "Costa Rica",
-    "Czech Republic", "Denmark", "Estonia", "Finland", "France",
-    "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel",
-    "Italy", "Japan", "Latvia", "Lithuania", "Luxembourg",
-    "Netherlands", "New Zealand", "Norway", "Poland", "Portugal",
-    "Slovakia", "Slovenia", "South Korea", "Spain", "Sweden",
-    "Switzerland", "Turkey", "United Kingdom", "United States"
+    oecd = [
+        "Australia", "Austria", "Belgium", "Chile", "Colombia", "Costa Rica",
+        "Czech Republic", "Denmark", "Estonia", "Finland", "France",
+        "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel",
+        "Italy", "Japan", "Latvia", "Lithuania", "Luxembourg",
+        "Netherlands", "New Zealand", "Norway", "Poland", "Portugal",
+        "Slovakia", "Slovenia", "South Korea", "Spain", "Sweden",
+        "Switzerland", "Turkey", "United Kingdom", "United States"
     ]
-
 
     non_oecd = [
         "Afghanistan", "Albania", "Angola", "Antarctica", "Antigua and Barbuda",
@@ -178,44 +217,29 @@ def classify_country(df, prod_cons):
         "Uzbekistan", "Vanuatu", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
     ]
 
-    opec = [
-    "Algeria", "Republic of the Congo", "Equatorial Guinea", "Gabon", "Iran", "Iraq",
-    "Kuwait", "Libya", "Nigeria", "Saudi Arabia", "United Arab Emirates", "Venezuela"
-    ]
 
+    if 'OPEC' in df.columns:
+        opec = [
+            "Algeria", "Republic of the Congo", "Equatorial Guinea", "Gabon", "Iran", "Iraq",
+            "Kuwait", "Libya", "Nigeria", "Saudi Arabia", "United Arab Emirates", "Venezuela"
+        ]
 
-
-    oecd_europe = [
-        "Austria", "Belgium", "Czech Republic", "Denmark", "Estonia", "Finland", "France",
-        "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Luxembourg",
-        "Netherlands", "Norway", "Poland", "Portugal", "Slovakia", "Slovenia", "Spain",
-        "Sweden", "Switzerland", "Turkey", "United Kingdom"
-    ]
-
-    non_oecd_europe = [
-    "Albania", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus",
-    "Kosovo", "North Macedonia", "Malta", "Montenegro", "Romania", "Serbia"
-    ]
-
-
-    eurasia = [
-        "Armenia", "Azerbaijan", "Belarus", "Estonia", "Georgia", "Kazakhstan",
-        "Kyrgyzstan", "Latvia", "Lithuania", "Moldova", "Russia", "Tajikistan",
-        "Turkmenistan", "Ukraine", "Uzbekistan"
-    ]
-
+    else:
+        non_oecd += [
+            "Algeria", "Republic of the Congo", "Equatorial Guinea", "Gabon", "Iran", "Iraq",
+            "Kuwait", "Libya", "Nigeria", "Saudi Arabia", "United Arab Emirates", "Venezuela"
+        ]
 
     # Convert year_month into year
     df['year'] = df['year_month'].str[:4]
     df = df.sort_values(by='year', ascending=False)
 
     # Aggregate data by year
-    df = df.iloc[:,1:].groupby(['year']).sum().reset_index()
-    print(df.iloc[1,[0,1,2,3,4,5]])
+    df = df.iloc[:, 1:].groupby(['year']).sum().reset_index()
 
     # Reshape data into long format
     df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], var_name='Group', value_name=prod_cons)
-    df_long[prod_cons] = df_long[prod_cons]*1000000
+    df_long[prod_cons] = df_long[prod_cons] * 1000000
 
     # This is for handling dataframe having different datasets
     expanded_rows = []
@@ -223,16 +247,10 @@ def classify_country(df, prod_cons):
         group = row['Group']
         if group == 'OECD':
             countries = oecd
-        elif group == 'NON_OECD':
+        elif group == 'Non-OECD':
             countries = non_oecd
         elif group == 'OPEC':
             countries = opec
-        elif group == 'OECD_EUROPE':
-            countries = oecd_europe
-        elif group == 'NON_OECD_EUROPE':
-            countries = non_oecd_europe
-        elif group == 'EURASIA':
-            countries = eurasia
         else:
             countries = [group]
 
