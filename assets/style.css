@@ -12,7 +12,8 @@ body {
 .header {
     background-color: #252a3b;
     height: auto;
-    padding: 15px 10px;
+    margin-top: 0px;
+    padding: 0px 0px 15px 10px;
     display: flex;
     flex-direction: column;
     border-radius: 10px;
@@ -135,6 +136,17 @@ body {
     color: white;
     display: inline-block;
     width: 45%;
+    margin: 10px;
+}
+
+.map {
+    background-color: #252a3b;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    color: white;
+    display: flex;
+    width: 40%;
     margin: 10px;
 }
 
