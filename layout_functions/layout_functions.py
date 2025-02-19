@@ -182,6 +182,44 @@ def horizontal_bar_chart(df, prod_cons,orientation=None, title=None, x_axis=None
 
     return fig
 
+def stacked_area_graph(fig, df, y=None, title=None, label=None):
+
+    # Convert year_month into year
+    #df['year'] = df['year_month'].str[:4]
+
+    # Aggregate data by year
+    df = df.iloc[:, 1:].groupby(['year_month']).sum().reset_index()
+
+    if df.shape[1] > 3:
+        df['total'] = df.iloc[:, 1:-1].sum(axis=1)
+        fig = fig.add_trace(go.Scatter(
+            x=df['year_month'],
+            y=df['total'],
+            mode='lines',
+            stackgroup='one',
+            name=label
+            ))
+
+    else:
+        fig = fig.add_trace(go.Scatter(
+            x=df['year_month'],
+            y=df[y],
+            mode='lines',
+            stackgroup='one',
+            name=label
+        ))
+
+    fig.update_layout(
+        title="Yearly Oil Production, Consumption Compared to CO2 Emission from Petroleum Products",
+        xaxis=dict(title="Year", type='category'),  # Ensure years are treated as categories
+        yaxis=dict(title="Value"),
+        plot_bgcolor="#252a3b",
+        paper_bgcolor="#1E1E2F",
+        font=dict(color="white")
+    )
+
+    return fig
+
 
 def classify_country(df, prod_cons):
 

@@ -28,6 +28,7 @@ bls_gas =pd.read_csv('./data/bls_gas_price.csv')
 eia_petroleum_spot = pd.read_csv('./data/eia_crude_price.csv')
 eia_api_crude_production = pd.read_csv('./data/eia_crude_production.csv')
 eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
+eia_emission = pd.read_csv('./data/eia_emission.csv')
 
 
 external_stylesheets = [
@@ -236,22 +237,49 @@ def update_chart(start_date, end_date, value):
     elif value == 'Energy Dependence':
 
         chart_layout.clear()
-        fig_production = map_graph(eia_api_crude_production,
-                                   'Million Barrels/Day',
-                                   'Global Heatmap of Crude Oil Production Over Time')
-        fig_consumption = map_graph(eia_api_crude_consumption,
-                                    'Million Barrels/Day',
-                                    'Global Heatmap of Crude Oil Consumption Over Time')
+        fig_production = map_graph(
+            eia_api_crude_production,
+            'Million Barrels/Day',
+            'Global Heatmap of Crude Oil Production Over Time'
+        )
+        fig_consumption = map_graph(
+            eia_api_crude_consumption,
+            'Million Barrels/Day',
+            'Global Heatmap of Crude Oil Consumption Over Time'
+        )
 
-        fig_bar_prod = horizontal_bar_chart(eia_api_crude_production, 'Million Barrels/Day',
-                                            title='Bar Chart of Crude Oil Production',
-                                            x_axis='Crude Oil Production Million Barrels/Year',
-                                            y_axis='Region')
-        fig_bar_cons = horizontal_bar_chart(eia_api_crude_consumption, 'Million Barrels/Day',
-                                            title='Bar Chart of Crude Oil Consumption',
-                                            x_axis='Crude Oil Production Million Barrels/Year',
-                                            y_axis='Region'
-                                            )
+        fig_bar_prod = horizontal_bar_chart(
+            eia_api_crude_production,
+            'Million Barrels/Day',
+            title='Bar Chart of Crude Oil Production',
+            x_axis='Crude Oil Production Million Barrels/Year',
+            y_axis='Region'
+        )
+
+        fig_bar_cons = horizontal_bar_chart(
+            eia_api_crude_consumption,
+            'Million Barrels/Day',
+            title='Bar Chart of Crude Oil Consumption',
+            x_axis='Crude Oil Production Million Barrels/Year',
+            y_axis='Region'
+        )
+
+        fig_stacked_area_prod = go.Figure()
+        fig_stacked_area_prod = stacked_area_graph(
+            fig_stacked_area_prod,
+            eia_api_crude_production,
+            label='Crude Oil Production Million Barrel/Day',
+        )
+        fig_stacked_area_prod = stacked_area_graph(
+            fig_stacked_area_prod,
+            eia_api_crude_consumption,
+            label='Crude Oil Consumption Million Barrel/Day',
+        )
+        fig_stacked_area_prod = stacked_area_graph(
+            fig_stacked_area_prod,
+            eia_emission, y='CO2 Emission from Petroleum Products',
+            label='CO2 Emission Million Metric Tonnes',
+        )
 
         chart_layout = [
             html.Div(dcc.Markdown('''
@@ -262,8 +290,8 @@ def update_chart(start_date, end_date, value):
             html.Div(children=[
                 dcc.Graph(figure=fig_bar_prod, className='half_card'),
                 dcc.Graph(figure=fig_bar_cons, className='half_card')
-
-            ])
+            ]),
+            html.Div(dcc.Graph(figure=fig_stacked_area_prod, className='full_card'))
         ]
 
 
