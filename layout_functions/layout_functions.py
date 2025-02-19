@@ -140,11 +140,10 @@ def dual_axis_line_chart(fig, data, x, y1, y2, title=None, x_axis=None, y1_axis=
     return fig
 
 
-def horizontal_bar_chart(df, prod_cons, orientation=None, title=None, x_axis=None, y_axis=None):
+def horizontal_bar_chart(df, prod_cons, title=None, x_axis=None, y_axis=None):
 
     df = agg_year_month(df, 'year', 'year_month','mean')
-
-    df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], value_name=prod_cons)
+    df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:], value_name=prod_cons)
     df_long = df_long.sort_values(by=['year', prod_cons], ascending=[True, True])
     global_max = df_long[prod_cons].max()
 
@@ -230,7 +229,7 @@ def classify_country(df, prod_cons):
         "Italy", "Japan", "Latvia", "Lithuania", "Luxembourg",
         "Netherlands", "New Zealand", "Norway", "Poland", "Portugal",
         "Slovakia", "Slovenia", "South Korea", "Spain", "Sweden",
-        "Switzerland", "Turkey", "United Kingdom", "United States"
+        "Switzerland", "Turkey", "United Kingdom"
     ]
 
     non_oecd = [
@@ -275,7 +274,7 @@ def classify_country(df, prod_cons):
     df = agg_year_month(df, 'year', 'year_month','mean')
 
     # Reshape data into long format
-    df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], var_name='Group', value_name=prod_cons)
+    df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:], var_name='Group', value_name=prod_cons)
     df_long[prod_cons] = df_long[prod_cons]
 
     # This is for handling dataframe having different datasets
@@ -300,10 +299,11 @@ def classify_country(df, prod_cons):
 
 def map_graph(df, prod_cons, title):
 
+    df_classified = classify_country(df, prod_cons)
     global_max = classify_country(df, prod_cons)[prod_cons].max()
 
     fig = px.choropleth(
-        classify_country(df, prod_cons),
+        df_classified,
         locations='Country',
         locationmode='country names',
         color=prod_cons,
@@ -311,7 +311,12 @@ def map_graph(df, prod_cons, title):
         hover_data={'Group': True, prod_cons: True},
         title=title,
         animation_frame='year',
-        range_color=[0, global_max]
+        range_color=[0, global_max],
+        color_continuous_scale=[
+        [0.0, "#FFEDA0"],  # Light Yellow
+        [0.5, "#FD8D3C"],  # Bright Orange
+        [1.0, "#B10026"] # Deep Red
+        ]
     )
 
     # Apply full dark theme styling and remove excess space
