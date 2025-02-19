@@ -28,6 +28,7 @@ def header():
 
     return header_layout
 
+
 def date_picker(data):
     # Convert 'year_month' to a unique sorted list for dropdown
     month_options = [{'label': ym, 'value': ym} for ym in sorted(data['year_month'].unique())]
@@ -72,8 +73,8 @@ def drop_down():
 
     return menu
 
-def line_graph(fig, data,x, y, title = None, x_axis=None, y_axis=None):
 
+def line_graph(fig, data, x, y, title=None, x_axis=None, y_axis=None):
     fig.add_trace(go.Scatter(
         x=data[x],
         y=data[y],
@@ -87,16 +88,15 @@ def line_graph(fig, data,x, y, title = None, x_axis=None, y_axis=None):
         yaxis_title=y_axis,
         showlegend=True,
         legend=dict(title="Legend"),
-        plot_bgcolor = '#252a3b',  # Dark background
-        paper_bgcolor = '#1E1E2F',  # Dark paper background
-        font = dict(color='white')
+        plot_bgcolor='#252a3b',  # Dark background
+        paper_bgcolor='#1E1E2F',  # Dark paper background
+        font=dict(color='white')
     )
 
     return fig
 
 
-def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis=None, y2_axis=None):
-
+def dual_axis_line_chart(fig, data, x, y1, y2, title=None, x_axis=None, y1_axis=None, y2_axis=None):
     for item in y1:
         fig.add_trace(go.Scatter(
             x=data[x],
@@ -131,7 +131,7 @@ def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis
             side="right",
             showgrid=False
         ),
-        legend=dict(title='Legend',x=1.2, y=1),
+        legend=dict(title='Legend', x=1.2, y=1),
         plot_bgcolor="#252a3b",
         paper_bgcolor="#1E1E2F",
         font=dict(color="white")
@@ -140,21 +140,15 @@ def dual_axis_line_chart(fig, data,x, y1, y2, title = None, x_axis=None, y1_axis
     return fig
 
 
-def horizontal_bar_chart(df, prod_cons,orientation=None, title=None, x_axis=None, y_axis=None):
-
+def horizontal_bar_chart(df, prod_cons, orientation=None, title=None, x_axis=None, y_axis=None):
     # Convert year_month into year
     df['year'] = df['year_month'].str[:4]
 
-
     # Aggregate data by year
-    df = df.iloc[:, 1:].groupby(['year']).sum().reset_index()
+    df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
 
     df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], value_name=prod_cons)
     df_long = df_long.sort_values(by=['year', prod_cons], ascending=[True, True])
-    df_long[prod_cons] = df_long[prod_cons]/12
-
-    # Then take the average = average barrels of oil per day
-
     global_max = df_long[prod_cons].max()
 
     fig = px.bar(
@@ -182,27 +176,27 @@ def horizontal_bar_chart(df, prod_cons,orientation=None, title=None, x_axis=None
 
     return fig
 
-def stacked_area_graph(fig, df, y=None, title=None, label=None):
 
+def stacked_area_graph(fig, df, y=None, title=None, label=None):
     # Convert year_month into year
-    #df['year'] = df['year_month'].str[:4]
+    df['year'] = df['year_month'].str[:4]
 
     # Aggregate data by year
-    df = df.iloc[:, 1:].groupby(['year_month']).sum().reset_index()
+    df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
 
     if df.shape[1] > 3:
         df['total'] = df.iloc[:, 1:-1].sum(axis=1)
         fig = fig.add_trace(go.Scatter(
-            x=df['year_month'],
+            x=df['year'],
             y=df['total'],
             mode='lines',
             stackgroup='one',
             name=label
-            ))
+        ))
 
     else:
         fig = fig.add_trace(go.Scatter(
-            x=df['year_month'],
+            x=df['year'],
             y=df[y],
             mode='lines',
             stackgroup='one',
@@ -222,7 +216,6 @@ def stacked_area_graph(fig, df, y=None, title=None, label=None):
 
 
 def classify_country(df, prod_cons):
-
     oecd = [
         "Australia", "Austria", "Belgium", "Chile", "Colombia", "Costa Rica",
         "Czech Republic", "Denmark", "Estonia", "Finland", "France",
@@ -259,7 +252,6 @@ def classify_country(df, prod_cons):
         "Uzbekistan", "Vanuatu", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
     ]
 
-
     if 'OPEC' in df.columns:
         opec = [
             "Algeria", "Republic of the Congo", "Equatorial Guinea", "Gabon", "Iran", "Iraq",
@@ -277,12 +269,11 @@ def classify_country(df, prod_cons):
     df = df.sort_values(by='year', ascending=False)
 
     # Aggregate data by year
-    df = df.iloc[:, 1:].groupby(['year']).sum().reset_index()
+    df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
 
     # Reshape data into long format
     df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], var_name='Group', value_name=prod_cons)
-    df_long[prod_cons] = df_long[prod_cons]/12
-
+    df_long[prod_cons] = df_long[prod_cons]
 
     # This is for handling dataframe having different datasets
     expanded_rows = []
@@ -305,7 +296,6 @@ def classify_country(df, prod_cons):
 
 
 def map_graph(df, prod_cons, title):
-
     global_max = classify_country(df, prod_cons)[prod_cons].max()
 
     fig = px.choropleth(
