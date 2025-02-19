@@ -141,11 +141,8 @@ def dual_axis_line_chart(fig, data, x, y1, y2, title=None, x_axis=None, y1_axis=
 
 
 def horizontal_bar_chart(df, prod_cons, orientation=None, title=None, x_axis=None, y_axis=None):
-    # Convert year_month into year
-    df['year'] = df['year_month'].str[:4]
 
-    # Aggregate data by year
-    df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
+    df = agg_year_month(df, 'year', 'year_month','mean')
 
     df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], value_name=prod_cons)
     df_long = df_long.sort_values(by=['year', prod_cons], ascending=[True, True])
@@ -178,11 +175,8 @@ def horizontal_bar_chart(df, prod_cons, orientation=None, title=None, x_axis=Non
 
 
 def stacked_area_graph(fig, df, y=None, title=None, label=None):
-    # Convert year_month into year
-    df['year'] = df['year_month'].str[:4]
 
-    # Aggregate data by year
-    df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
+    df = agg_year_month(df, 'year', 'year_month', 'mean')
 
     if df.shape[1] > 3:
         df['total'] = df.iloc[:, 1:-1].sum(axis=1)
@@ -277,12 +271,6 @@ def classify_country(df, prod_cons):
             "Kuwait", "Libya", "Nigeria", "Saudi Arabia", "United Arab Emirates", "Venezuela"
         ]
 
-    # Convert year_month into year
-    # df['year'] = df['year_month'].str[:4]
-    # df = df.sort_values(by='year', ascending=False)
-    #
-    # # Aggregate data by year
-    # df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
 
     df = agg_year_month(df, 'year', 'year_month','mean')
 
@@ -311,6 +299,7 @@ def classify_country(df, prod_cons):
 
 
 def map_graph(df, prod_cons, title):
+
     global_max = classify_country(df, prod_cons)[prod_cons].max()
 
     fig = px.choropleth(

@@ -29,6 +29,7 @@ eia_petroleum_spot = pd.read_csv('./data/eia_crude_price.csv')
 eia_api_crude_production = pd.read_csv('./data/eia_crude_production.csv')
 eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
 eia_emission = pd.read_csv('./data/eia_emission.csv')
+eia_emission.iloc[:, 1] = eia_emission.iloc[:, 1] / 30
 
 
 external_stylesheets = [
@@ -252,7 +253,7 @@ def update_chart(start_date, end_date, value):
             eia_api_crude_production,
             'Million Barrels/Day',
             title='Bar Chart of Crude Oil Production',
-            x_axis='Crude Oil Production Million Barrels/Year',
+            x_axis='Crude Oil Production Million Barrels/Day',
             y_axis='Region'
         )
 
@@ -260,7 +261,7 @@ def update_chart(start_date, end_date, value):
             eia_api_crude_consumption,
             'Million Barrels/Day',
             title='Bar Chart of Crude Oil Consumption',
-            x_axis='Crude Oil Production Million Barrels/Year',
+            x_axis='Crude Oil Production Million Barrels/Day',
             y_axis='Region'
         )
 
@@ -268,19 +269,19 @@ def update_chart(start_date, end_date, value):
         fig_stacked_area_prod = stacked_area_graph(
             fig_stacked_area_prod,
             eia_api_crude_production,
-            label='Crude Oil Production Million Barrel/Day',
+            label='Average Crude Oil Production Million Barrel/Day',
         )
         fig_stacked_area_prod = stacked_area_graph(
             fig_stacked_area_prod,
             eia_api_crude_consumption,
-            label='Crude Oil Consumption Million Barrel/Day',
+            label='Average Crude Oil Consumption Million Barrel/Day',
         )
         fig_stacked_area_prod = stacked_area_graph(
             fig_stacked_area_prod,
             eia_emission,
             y='CO2 Emission from Petroleum Products',
             title='Yearly Oil Production, Consumption Compared to CO2 Emission from Petroleum Products',
-            label='CO2 Emission Million Metric Tonnes/Month',
+            label='Average CO2 Emission Million Metric Tonnes/Day',
         )
 
         chart_layout = [
@@ -301,7 +302,7 @@ def update_chart(start_date, end_date, value):
 
         pass
 
-    else:
+    else: # Reserved for the future
 
         pass
 
