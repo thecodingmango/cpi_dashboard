@@ -216,7 +216,7 @@ def agg_year_month(df, agg_by, column, method):
         df = df.iloc[:, 1:].groupby([agg_by]).mean(numeric_only=True).reset_index()
 
     elif method == 'sum':
-        df = df.iloc[:, 1:].groupby([agg_by]).sum().reset_index()
+        df = df.iloc[:, 1:].groupby([agg_by]).sum(numeric_only=True).reset_index()
 
     return df
 
@@ -340,6 +340,52 @@ def map_graph(df, prod_cons, title):
             lataxis=dict(range=[-60, 85])
         ),
         margin=dict(l=0, r=0, t=50, b=0),
+    )
+
+    return fig
+
+
+def cd_chart(df1, df2,prod_cons,title=None, x_axis=None, y_axis=None):
+    df_long = agg_year_month(df1, 'year', 'year_month', 'mean')
+
+    df_long['Total Consumption'] = agg_year_month(df1,'year', 'year_month', 'mean').sum(
+            numeric_only=True, axis=1).reset_index()[0]
+
+    df_long.iloc[:, 1:-1] = df_long.iloc[:, 1:-1].div(df_long['Total Consumption'], axis=0).mul(
+        agg_year_month(df2, 'year', 'year_month', 'mean').iloc[:, 1], axis=0)
+    df_long = df_long.drop('Total Consumption', axis=1)
+    df_long = df_long.melt(id_vars=['year'], value_vars=df_long.columns[1:],
+                           value_name='CO2 Emission from Petroleum Products')
+
+    df_long_2 = agg_year_month(df1, 'year', 'year_month', 'mean')
+    df_long_2 = df_long_2.melt(id_vars=['year'], value_vars=df_long_2.columns[1:], value_name=prod_cons)
+
+    df_merge = df_long_2.merge(df_long, how='left', on=['year', 'variable'])
+    print(df_merge)
+
+    df_merge = df_merge.sort_values(by=['year', prod_cons], ascending=[True, True])
+
+    fig = px.scatter(
+        df_merge,
+        x=prod_cons,
+        y='CO2 Emission from Petroleum Products',
+        size='CO2 Emission from Petroleum Products',
+        color='variable',
+        text='variable',
+        animation_frame='year',
+        size_max=120,
+        log_x=True
+    )
+
+    fig.update_layout(
+        plot_bgcolor="#252a3b",
+        paper_bgcolor="#1E1E2F",
+        title=title,
+        font=dict(color="white"),
+        xaxis=dict(title=x_axis,range=[0, 2],showgrid=False),
+        yaxis=dict(title=y_axis, range=[0, 6],showgrid=False),
+        legend=dict(title='Country'),
+        transition={"duration": 500, "easing": "cubic-in-out"}
     )
 
     return fig

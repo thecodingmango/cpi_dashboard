@@ -22,15 +22,13 @@ eia_api_crude_consumption = data_api.retrieve_data_eia(config.eia_crude_consumpt
                                                        ['value'])
 '''
 
-
 bls_data = pd.read_csv('./data/bls_food.csv')
-bls_gas =pd.read_csv('./data/bls_gas_price.csv')
+bls_gas = pd.read_csv('./data/bls_gas_price.csv')
 eia_petroleum_spot = pd.read_csv('./data/eia_crude_price.csv')
 eia_api_crude_production = pd.read_csv('./data/eia_crude_production.csv')
 eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
 eia_emission = pd.read_csv('./data/eia_emission.csv')
 eia_emission.iloc[:, 1] = eia_emission.iloc[:, 1] / 30
-
 
 external_stylesheets = [
     {
@@ -83,7 +81,8 @@ app.layout = html.Div(
                             ],
                             style_table={'overflowX': 'auto'},
                             style_header={'backgroundColor': '#444', 'fontWeight': 'bold', 'color': 'white'},
-                            style_cell={'textAlign': 'center', 'padding': '5px', 'backgroundColor': '#333', 'color': 'white'},
+                            style_cell={'textAlign': 'center', 'padding': '5px', 'backgroundColor': '#333',
+                                        'color': 'white'},
                         )
 
                     ]
@@ -107,7 +106,7 @@ app.layout = html.Div(
                                 html.Div(
                                     id='charts_container',
                                     className='cpi_chart_container')
-                        ])
+                            ])
                         )
                     ]
                 )
@@ -132,14 +131,13 @@ app.layout = html.Div(
     ]
 )
 def update_chart(start_date, end_date, value):
-
     filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
     filtered_data_bls = bls_data.loc[filters_date_bls, :]
 
     filtered_bls_gas = bls_gas.loc[filters_date_bls, :]
 
     eia_filter = ((eia_petroleum_spot['year_month'] >= start_date) &
-                   (eia_petroleum_spot['year_month'] <= end_date))
+                  (eia_petroleum_spot['year_month'] <= end_date))
     eia_petro_price = eia_petroleum_spot.loc[eia_filter, :]
 
     eia_filter_consumption = ((eia_api_crude_consumption['year_month'] >= start_date) &
@@ -147,11 +145,10 @@ def update_chart(start_date, end_date, value):
     eia_oil_consumption = eia_api_crude_consumption.loc[eia_filter_consumption, :]
 
     eia_filter_production = ((eia_api_crude_production['year_month'] >= start_date) &
-                                 (eia_api_crude_production['year_month'] <= end_date))
+                             (eia_api_crude_production['year_month'] <= end_date))
     eia_oil_production = eia_api_crude_production.loc[eia_filter_production, :]
 
     chart_layout = []
-
 
     def get_summary(df, column):
         if column not in df:
@@ -167,7 +164,7 @@ def update_chart(start_date, end_date, value):
         prev_month = df[column].iloc[-2] if len(df) > 1 else None
         one_year = df[df['year_month'] == (end - timedelta(days=365)).strftime('%Y-%m')][column].values
         one_year = one_year[0] if len(one_year) > 0 else None
-        five_year = df[df['year_month'] == (end - timedelta(days=365*5)).strftime('%Y-%m')][column].values
+        five_year = df[df['year_month'] == (end - timedelta(days=365 * 5)).strftime('%Y-%m')][column].values
         five_year = five_year[0] if len(five_year) > 0 else None
 
         return {
@@ -206,18 +203,26 @@ def update_chart(start_date, end_date, value):
                              y1_axis='Crude Spot Price in USD', y2_axis='Unleaded Gasoline in USD/Gallon')
 
         fig_crude_production = go.Figure()
-        print(eia_api_crude_production)
-        print(eia_oil_production.columns[1:-1])
         for item in eia_oil_production.columns[1:-1]:
-            line_graph(fig_crude_production, eia_oil_production, 'year_month', item,
-                       'Crude Oil Production Trend by Region','Year',
-                       'Million Barrel/Day')
+            line_graph(
+                fig_crude_production,
+                eia_oil_production,
+                'year_month',
+                item,
+                'Crude Oil Production Trend by Region', 'Year',
+                'Million Barrel/Day'
+            )
 
         fig_crude_consumption = go.Figure()
         for item in eia_oil_consumption.columns[1:-1]:
-            line_graph(fig_crude_consumption, eia_oil_consumption, 'year_month', item,
-                       'Crude Oil Consumption Trend by Region','Year',
-                       'Million Barrels/Day')
+            line_graph(
+                fig_crude_consumption,
+                eia_oil_consumption,
+                'year_month',
+                item,
+                'Crude Oil Consumption Trend by Region',
+                'Year',
+                'Million Barrels/Day')
 
         chart_layout = [
             html.Div(dcc.Graph(figure=fig_cpi, className='full_card')),
@@ -280,17 +285,40 @@ def update_chart(start_date, end_date, value):
             label='Average CO2 Emission Million Metric Tonnes/Day',
         )
 
+        fig_cd_consumption = cd_chart(
+            eia_api_crude_consumption.copy(),
+            eia_emission.copy(),
+            'Consumption',
+            title='Global Oil Consumption & CO₂ Emissions Over Time',
+            x_axis='Oil Consumption Million Barrels/Day',
+            y_axis='CO₂ Emissions Million Tons/Day'
+        )
+
+        fig_cd_production = cd_chart(
+            eia_api_crude_production.copy(),
+            eia_emission.copy(),
+            'Production',
+            title='Global Oil Production & CO₂ Emissions Over Time',
+            x_axis='Oil Production Million Barrels/Day',
+            y_axis='CO₂ Emissions Million Tons/Day'
+        )
+
         chart_layout = [
             html.Div(dcc.Markdown('''
                     # Talk about this page
                     ''')),
-            html.Div(children=[dcc.Graph(figure=fig_production, className='map'),
-                               dcc.Graph(figure=fig_consumption, className='map')]),
+            html.Div(children=[
+                dcc.Graph(figure=fig_production, className='map'),
+                dcc.Graph(figure=fig_consumption, className='map')]
+            ),
             html.Div(children=[
                 dcc.Graph(figure=fig_bar_prod, className='half_card'),
-                dcc.Graph(figure=fig_bar_cons, className='half_card')
-            ]),
-            html.Div(dcc.Graph(figure=fig_stacked_area_prod, className='full_card'))
+                dcc.Graph(figure=fig_bar_cons, className='half_card')]
+            ),
+            html.Div(dcc.Graph(figure=fig_stacked_area_prod, className='full_card')),
+            html.Div(dcc.Graph(figure=fig_cd_production, className='full_card')),
+            html.Div(dcc.Graph(figure=fig_cd_consumption, className='full_card'))
+
         ]
 
 
@@ -298,9 +326,8 @@ def update_chart(start_date, end_date, value):
 
         pass
 
-    else: # Reserved for the future
+    else:  # Reserved for the future
 
         pass
 
     return [chart_layout, table_data]
-
