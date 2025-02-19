@@ -206,6 +206,8 @@ def update_chart(start_date, end_date, value):
                              y1_axis='Crude Spot Price in USD', y2_axis='Unleaded Gasoline in USD/Gallon')
 
         fig_crude_production = go.Figure()
+        print(eia_api_crude_production)
+        print(eia_oil_production.columns[1:-1])
         for item in eia_oil_production.columns[1:-1]:
             line_graph(fig_crude_production, eia_oil_production, 'year_month', item,
                        'Crude Oil Production Trend by Region','Year',
@@ -233,18 +235,18 @@ def update_chart(start_date, end_date, value):
 
         chart_layout.clear()
         fig_production = map_graph(
-            eia_api_crude_production,
+            eia_api_crude_production.copy(),
             'Million Barrels/Day',
             'Global Heatmap of Crude Oil Production Over Time'
         )
         fig_consumption = map_graph(
-            eia_api_crude_consumption,
+            eia_api_crude_consumption.copy(),
             'Million Barrels/Day',
             'Global Heatmap of Crude Oil Consumption Over Time'
         )
 
         fig_bar_prod = horizontal_bar_chart(
-            eia_api_crude_production,
+            eia_api_crude_production.copy(),
             'Million Barrels/Day',
             title='Bar Chart of Crude Oil Production',
             x_axis='Crude Oil Production Million Barrels/Day',
@@ -252,7 +254,7 @@ def update_chart(start_date, end_date, value):
         )
 
         fig_bar_cons = horizontal_bar_chart(
-            eia_api_crude_consumption,
+            eia_api_crude_consumption.copy(),
             'Million Barrels/Day',
             title='Bar Chart of Crude Oil Consumption',
             x_axis='Crude Oil Production Million Barrels/Day',
@@ -262,17 +264,17 @@ def update_chart(start_date, end_date, value):
         fig_stacked_area_prod = go.Figure()
         fig_stacked_area_prod = stacked_area_graph(
             fig_stacked_area_prod,
-            eia_api_crude_production,
+            eia_api_crude_production.copy(),
             label='Average Crude Oil Production Million Barrel/Day',
         )
         fig_stacked_area_prod = stacked_area_graph(
             fig_stacked_area_prod,
-            eia_api_crude_consumption,
+            eia_api_crude_consumption.copy(),
             label='Average Crude Oil Consumption Million Barrel/Day',
         )
         fig_stacked_area_prod = stacked_area_graph(
             fig_stacked_area_prod,
-            eia_emission,
+            eia_emission.copy(),
             y='CO2 Emission from Petroleum Products',
             title='Yearly Oil Production, Consumption Compared to CO2 Emission from Petroleum Products',
             label='Average CO2 Emission Million Metric Tonnes/Day',

@@ -299,11 +299,10 @@ def classify_country(df, prod_cons):
 
 def map_graph(df, prod_cons, title):
 
-    df_classified = classify_country(df, prod_cons)
     global_max = classify_country(df, prod_cons)[prod_cons].max()
 
     fig = px.choropleth(
-        df_classified,
+        classify_country(df, prod_cons),
         locations='Country',
         locationmode='country names',
         color=prod_cons,
