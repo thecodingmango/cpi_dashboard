@@ -190,9 +190,6 @@ def update_chart(start_date, end_date, value):
         chart_layout.clear()
 
         fig_cpi = go.Figure()
-        # fig_cpi = line_graph(fig_cpi, filtered_data_bls, 'year_month', 'Cpi Values')
-        # fig_cpi = line_graph(fig_cpi, filtered_data_bls, 'year_month', 'PPI Values',
-        #                      'CPI & PPI Values Since ' + start_date, 'Year', 'Values (%)')
         dual_axis_line_chart(fig_cpi, filtered_data_bls, x='year_month', y1=['Cpi Values', 'PPI Values'],
                              y2=['Unemployment'], title='CPI, PPI, Unemployment Values Since ' + start_date,
                              x_axis='Year', y1_axis='Values (%)', y2_axis='Unemployment Rate (%)')
@@ -203,9 +200,6 @@ def update_chart(start_date, end_date, value):
                        'Average Food Price Since ' + start_date, 'Year', 'Price in USD')
 
         fig_crude_price = go.Figure()
-        # for item in eia_petro_price.columns[1:-1]:
-        #     line_graph(fig_crude_price, eia_petro_price, 'year_month', item, 'Crude Oil Spot Price Since ' +
-        #                start_date,'Year','Price in USD')
         dual_axis_line_chart(fig_crude_price, eia_petro_price.merge(filtered_bls_gas, how='left', on='year_month'),
                              x='year_month', y1=['UK Brent Prices', 'WTI Prices'], y2=['Unleaded Gasoline'],
                              title='Spot Prices for Crude Oil and Unleaded Gasoline', x_axis='Year',
