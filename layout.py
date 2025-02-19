@@ -277,7 +277,9 @@ def update_chart(start_date, end_date, value):
         )
         fig_stacked_area_prod = stacked_area_graph(
             fig_stacked_area_prod,
-            eia_emission, y='CO2 Emission from Petroleum Products',
+            eia_emission,
+            y='CO2 Emission from Petroleum Products',
+            title='Yearly Oil Production, Consumption Compared to CO2 Emission from Petroleum Products',
             label='CO2 Emission Million Metric Tonnes/Month',
         )
 

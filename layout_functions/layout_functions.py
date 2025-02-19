@@ -204,7 +204,7 @@ def stacked_area_graph(fig, df, y=None, title=None, label=None):
         ))
 
     fig.update_layout(
-        title="Yearly Oil Production, Consumption Compared to CO2 Emission from Petroleum Products",
+        title=title,
         xaxis=dict(title="Year", type='category'),  # Ensure years are treated as categories
         yaxis=dict(title="Value"),
         plot_bgcolor="#252a3b",
@@ -213,6 +213,19 @@ def stacked_area_graph(fig, df, y=None, title=None, label=None):
     )
 
     return fig
+
+def agg_year_month(df, agg_by, column, method):
+
+    if agg_by == 'year':
+        df[agg_by] = df[column].str[:4]
+
+    if method == 'mean':
+        df = df.iloc[:, 1:].groupby([agg_by]).mean(numeric_only=True).reset_index()
+
+    elif method == 'sum':
+        df = df.iloc[:, 1:].groupby([agg_by]).sum().reset_index()
+
+    return df
 
 
 def classify_country(df, prod_cons):
@@ -265,11 +278,13 @@ def classify_country(df, prod_cons):
         ]
 
     # Convert year_month into year
-    df['year'] = df['year_month'].str[:4]
-    df = df.sort_values(by='year', ascending=False)
+    # df['year'] = df['year_month'].str[:4]
+    # df = df.sort_values(by='year', ascending=False)
+    #
+    # # Aggregate data by year
+    # df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
 
-    # Aggregate data by year
-    df = df.iloc[:, 1:].groupby(['year']).mean(numeric_only=True).reset_index()
+    df = agg_year_month(df, 'year', 'year_month','mean')
 
     # Reshape data into long format
     df_long = df.melt(id_vars=['year'], value_vars=df.columns[1:-1], var_name='Group', value_name=prod_cons)
