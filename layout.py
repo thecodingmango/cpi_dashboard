@@ -55,7 +55,8 @@ app.layout = html.Div(
                     id='sidebar',
                     className='sidebar',
                     children=[
-                        dcc.Markdown('''
+                        dcc.Markdown(
+                            '''
                         ## About this Project
                         This project is a dashboard for visualizing the CPI levels and different
                         prices. 
@@ -67,7 +68,8 @@ app.layout = html.Div(
                         Retrieving Data using EIA API: [How to Retrieve Data from the EIA Website](https://thecodingmango.com/updating-data-for-cpi-dashboard-part-2/)
                         
                         Retrieving Data using BLS API: [How to Retrieve Data from the BLS Website](https://thecodingmango.com/updating-data-for-cpi-dashboard-part-1/)
-                    '''),
+                    '''
+                        ),
                         html.Hr(),
                         # Table for Descriptive Statistics
                         dash_table.DataTable(
@@ -79,12 +81,23 @@ app.layout = html.Div(
                                 {"name": "1 Year Ago", "id": "one_year"},
                                 {"name": "5 Years Ago", "id": "five_years"}
                             ],
-                            style_table={'overflowX': 'auto'},
-                            style_header={'backgroundColor': '#444', 'fontWeight': 'bold', 'color': 'white'},
-                            style_cell={'textAlign': 'center', 'padding': '5px', 'backgroundColor': '#333',
-                                        'color': 'white'},
+                            style_table={
+                                'overflowX': 'auto',
+                                'backgroundColor': '#252a3b'
+                            },
+                            style_header={
+                                'backgroundColor': '#1E1E2F',
+                                'fontWeight': 'bold',
+                                'color': 'white'
+                            },
+                            style_cell={
+                                'textAlign': 'center',
+                                'padding': '12px',
+                                'backgroundColor': '#252a3a',
+                                'color': 'white',
+                                'border': '2px solid #444'
+                            }
                         )
-
                     ]
                 ),
                 html.Div(
@@ -99,7 +112,6 @@ app.layout = html.Div(
                                 drop_down()
                             ]
                         ),
-
                         # CPI chart
                         html.Div(
                             dcc.Loading(type='circle', children=[
@@ -187,20 +199,36 @@ def update_chart(start_date, end_date, value):
         chart_layout.clear()
 
         fig_cpi = go.Figure()
-        dual_axis_line_chart(fig_cpi, filtered_data_bls, x='year_month', y1=['Cpi Values', 'PPI Values'],
-                             y2=['Unemployment'], title='CPI, PPI, Unemployment Values Since ' + start_date,
-                             x_axis='Year', y1_axis='Values (%)', y2_axis='Unemployment Rate (%)')
+        dual_axis_line_chart(
+            fig_cpi,
+            filtered_data_bls,
+            x='year_month',
+            y1=['Cpi Values', 'PPI Values'],
+            y2=['Unemployment'],
+            title='CPI, PPI, Unemployment Values Since ' + start_date,
+            x_axis='Year',
+            y1_axis='Values (%)',
+            y2_axis='Unemployment Rate (%)'
+        )
 
         fig_commodity = go.Figure()
         for item in filtered_data_bls.columns[1:-4]:
-            line_graph(fig_commodity, filtered_data_bls, 'year_month', item,
-                       'Average Food Price Since ' + start_date, 'Year', 'Price in USD')
+            line_graph(
+                fig_commodity,
+                filtered_data_bls,
+                'year_month',
+                item,
+                'Average Food Price Since ' + start_date, 'Year', 'Price in USD'
+            )
 
         fig_crude_price = go.Figure()
-        dual_axis_line_chart(fig_crude_price, eia_petro_price.merge(filtered_bls_gas, how='left', on='year_month'),
-                             x='year_month', y1=['UK Brent Prices', 'WTI Prices'], y2=['Unleaded Gasoline'],
-                             title='Spot Prices for Crude Oil and Unleaded Gasoline', x_axis='Year',
-                             y1_axis='Crude Spot Price in USD', y2_axis='Unleaded Gasoline in USD/Gallon')
+        dual_axis_line_chart(
+            fig_crude_price,
+            eia_petro_price.merge(filtered_bls_gas, how='left', on='year_month'),
+            x='year_month', y1=['UK Brent Prices', 'WTI Prices'], y2=['Unleaded Gasoline'],
+            title='Spot Prices for Crude Oil and Unleaded Gasoline', x_axis='Year',
+            y1_axis='Crude Spot Price in USD', y2_axis='Unleaded Gasoline in USD/Gallon'
+        )
 
         fig_crude_production = go.Figure()
         for item in eia_oil_production.columns[1:-1]:
