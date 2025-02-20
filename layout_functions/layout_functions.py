@@ -5,8 +5,8 @@ from dash import dcc
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
-from numpy.ma.core import resize
-
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from models import models
 
 def header():
     header_layout = html.Div(
