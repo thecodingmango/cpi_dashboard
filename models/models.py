@@ -16,6 +16,7 @@ from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_scor
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.vector_ar.var_model import forecast
 
 
@@ -67,9 +68,9 @@ class Model:
         return self.data
 
     def train_test_split(self, test_prop):
+
         train_size = int(len(self.y) * (1 - test_prop))
 
-        # Use iloc for position-based slicing
         x_train = self.y.iloc[:train_size, self.y.columns != self.target]
         x_test = self.y.iloc[train_size:, self.y.columns != self.target]
         y_train = self.y.iloc[:train_size][self.target]
@@ -101,9 +102,9 @@ class Model:
 
         mse = mean_squared_error(y_true=y_true, y_pred=y_pred)
         rmse = root_mean_squared_error(y_true=y_true, y_pred=y_pred)
-        r2 = r2_score(y_true=y_true, y_pred=y_pred)
 
-        return {'mse': mse, 'rmse': rmse, 'r2':r2}
+
+        return {'mse': mse, 'rmse': rmse}
 
 
     def lag_features(self, new_df, lag, remove_original=None):
@@ -127,8 +128,10 @@ class Model:
     def stl(self):
         pass
 
-    def arimax(self, p, d, q, exog=None): # Use p=1, d=1, q=1
+    def arimax(self, p, d, q, s, exog=None): # Use p=1, d=1, q=1
+
         pass
+
 
     def xgboost(self):
         pass
@@ -163,16 +166,14 @@ class Model:
             pred = ts_model.predict(X_future)[0]
 
             forecast_list.append({
-                X_future.columns[0] + "forecast": pred
+                X_future.columns[0] + "_forecast": pred
             })
 
             n_cols = X_future.shape[1]
 
-            # Shift columns in descending order:
             for j in range(n_cols - 1, 0, -1):
                 X_future.iloc[0, j] = X_future.iloc[0, j - 1]
 
-            # Now put the new prediction into the first column
             X_future.iloc[0, 0] = pred
 
         df_forecast = pd.DataFrame(forecast_list)
@@ -180,7 +181,7 @@ class Model:
 
     def model_building(self):
 
-        lag = list(range(1, 12))
+        lag = list(range(1, 3))
         self.y = self.lag_features(self.y.iloc[:, :-1], lag, False)
         x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.2)
 
@@ -188,18 +189,19 @@ class Model:
         lr_model = self.linear_regression(x_train, y_train)
         lr_pred = lr_model.predict(x_test)
         lr_metrics = self.metric(y_test, lr_pred)
+        r2 = r2_score(y_true=y_test, y_pred=lr_pred)
+        lr_metrics['r2'] = r2
+        print(y_test-lr_pred)
+
         print(lr_pred, '\n', lr_metrics)
 
         lr_forecast = self.iterative_forecast(lr_model, self.y,12)
         print(lr_forecast)
 
 
-
-
-
 data = pd.read_csv('./data/bls_food.csv')
 model = Model(df=data, y='Cpi Values')
-model.acf('Cpi Values', lag=100)
+#model.acf('Cpi Values', lag=100)
 #test_diff = model.check_stationarity(model.data)
 #model = model.min_max_transform(['Cpi Values', 'PPI Values'])
 #x_train, x_test, y_train, y_test = model.train_test_split(test_prop=0.2)
