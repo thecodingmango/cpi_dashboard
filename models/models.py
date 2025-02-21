@@ -86,16 +86,16 @@ class Model:
         ts_diff = ts_diff.dropna()
 
         plot_acf(ts, lags=lag)
-        #plt.savefig('acf.png')
+        plt.savefig('acf.png')
 
         plot_acf(ts_diff, lags=lag)
-        #plt.savefig('acf_2.png')
+        plt.savefig('acf_diff.png')
 
         plot_pacf(ts_diff, lags=lag)
-        #plt.savefig('pacf_2.png')
+        plt.savefig('pacf_diff.png')
 
         plt.plot(ts_diff)
-        #plt.savefig('ts_diff.png')
+        plt.savefig('ts_diff.png')
 
     def metric(self, y_true, y_pred):
 
@@ -199,6 +199,7 @@ class Model:
 
 data = pd.read_csv('./data/bls_food.csv')
 model = Model(df=data, y='Cpi Values')
+model.acf('Cpi Values', lag=100)
 #test_diff = model.check_stationarity(model.data)
 #model = model.min_max_transform(['Cpi Values', 'PPI Values'])
 #x_train, x_test, y_train, y_test = model.train_test_split(test_prop=0.2)
