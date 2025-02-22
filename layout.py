@@ -366,22 +366,23 @@ def update_chart(start_date, end_date, value):
 
 
     elif value == 'Forecasting':
-        chart_layout.clear()
+        print(filtered_data_bls.drop('Unnamed: 0', axis=1))
 
+        merged_df = filtered_data_bls.drop('Unnamed: 0', axis=1).merge(
+            filtered_bls_gas.drop('Unnamed: 0', axis=1), how='left', on='year_month')
+        merged_df = merged_df.merge(eia_petro_price.drop('Unnamed: 0', axis=1), how='left', on='year_month')
+
+        chart_layout.clear()
         fig_forecast_line = go.Figure()
         line_graph(fig_forecast_line, filtered_data_bls, 'year_month', 'Cpi Values')
 
-        fig_stl_trend = go.Figure()
-        line_graph(fig_stl_trend, stl_data, 'year_month', 'trend')
 
 
         chart_layout = [
             html.Div(),
             html.Div(dcc.Graph(figure=fig_forecast_line, className='full_card')), # Line chart
-            html.Div(dcc.Graph(figure=fig_stl_trend, className='full_card')), # STL graph
-            html.Div(),
-            html.Div(),
-            html.Div(),  # ACF, PACF
+            html.Div(dcc.Graph(figure=stl_chart(stl_data), className='stl_chart')),
+            html.Div(dcc.Graph(figure=acf_pacf_plot(stl_data), className='stl_chart')),  # ACF, PACF
             html.Div()
         ]
 
