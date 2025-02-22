@@ -145,8 +145,8 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     color: white;
-    display: flex;
-    width: 40%;
+    display: inline-block;
+    width: 45%;
     margin: 10px;
 }
 

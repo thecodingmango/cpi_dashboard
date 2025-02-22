@@ -22,6 +22,7 @@ eia_api_crude_consumption = data_api.retrieve_data_eia(config.eia_crude_consumpt
                                                        ['value'])
 '''
 
+# Reading data due to it is faster to load this than computing it everytime for Render
 bls_data = pd.read_csv('./data/bls_food.csv')
 bls_gas = pd.read_csv('./data/bls_gas_price.csv')
 eia_petroleum_spot = pd.read_csv('./data/eia_crude_price.csv')
@@ -29,6 +30,7 @@ eia_api_crude_production = pd.read_csv('./data/eia_crude_production.csv')
 eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
 eia_emission = pd.read_csv('./data/eia_emission.csv')
 eia_emission.iloc[:, 1] = eia_emission.iloc[:, 1] / 30
+stl_data = pd.read_csv('./data/stl.csv')
 
 external_stylesheets = [
     {
@@ -253,15 +255,22 @@ def update_chart(start_date, end_date, value):
                 'Million Barrels/Day')
 
         chart_layout = [
-            html.Div(dcc.Graph(figure=fig_cpi, className='full_card')),
-            html.Div(children=[
-                dcc.Graph(figure=fig_commodity, className='half_card'),
-                dcc.Graph(figure=fig_crude_price, className='half_card')
-            ]),
-            html.Div(children=[
-                dcc.Graph(figure=fig_crude_production, className='half_card'),
-                dcc.Graph(figure=fig_crude_consumption, className='half_card')
-            ])
+            html.Div(
+                children=[
+                    dcc.Interval(),
+                    html.Div(dcc.Graph(figure=fig_cpi, className='full_card')),
+                    html.Div(children=[
+                        dcc.Graph(figure=fig_commodity, className='half_card'),
+                        dcc.Graph(figure=fig_crude_price, className='half_card')
+                    ]),
+                    html.Div(children=[
+                        dcc.Graph(figure=fig_crude_production, className='half_card'),
+                        dcc.Graph(figure=fig_crude_consumption, className='half_card')
+                    ])
+                ]
+
+            )
+
         ]
 
     elif value == 'Energy Dependence':
@@ -332,27 +341,49 @@ def update_chart(start_date, end_date, value):
         )
 
         chart_layout = [
-            html.Div(dcc.Markdown('''
-                    # Talk about this page
-                    ''')),
-            html.Div(children=[
-                dcc.Graph(figure=fig_production, className='map'),
-                dcc.Graph(figure=fig_consumption, className='map')]
-            ),
-            html.Div(children=[
-                dcc.Graph(figure=fig_bar_prod, className='half_card'),
-                dcc.Graph(figure=fig_bar_cons, className='half_card')]
-            ),
-            html.Div(dcc.Graph(figure=fig_stacked_area_prod, className='full_card')),
-            html.Div(dcc.Graph(figure=fig_cd_production, className='full_card')),
-            html.Div(dcc.Graph(figure=fig_cd_consumption, className='full_card'))
+            html.Div(
+                children=[
+                    dcc.Interval(),
+                    html.Div(dcc.Markdown('''
+                            # Talk about this page
+                            ''')),
+                    html.Div(children=[
+                        dcc.Graph(figure=fig_production, className='map'),
+                        dcc.Graph(figure=fig_consumption, className='map')]
+                    ),
+                    html.Div(children=[
+                        dcc.Graph(figure=fig_bar_prod, className='half_card'),
+                        dcc.Graph(figure=fig_bar_cons, className='half_card')]
+                    ),
+                    html.Div(dcc.Graph(figure=fig_stacked_area_prod, className='full_card')),
+                    html.Div(dcc.Graph(figure=fig_cd_production, className='full_card')),
+                    html.Div(dcc.Graph(figure=fig_cd_consumption, className='full_card'))
+                ]
+            )
+
 
         ]
 
 
     elif value == 'Forecasting':
+        chart_layout.clear()
 
-        pass
+        fig_forecast_line = go.Figure()
+        line_graph(fig_forecast_line, filtered_data_bls, 'year_month', 'Cpi Values')
+
+        fig_stl_trend = go.Figure()
+        line_graph(fig_stl_trend, stl_data, 'year_month', 'trend')
+
+
+        chart_layout = [
+            html.Div(),
+            html.Div(dcc.Graph(figure=fig_forecast_line, className='full_card')), # Line chart
+            html.Div(dcc.Graph(figure=fig_stl_trend, className='full_card')), # STL graph
+            html.Div(),
+            html.Div(),
+            html.Div(),  # ACF, PACF
+            html.Div()
+        ]
 
     else:  # Reserved for the future
 

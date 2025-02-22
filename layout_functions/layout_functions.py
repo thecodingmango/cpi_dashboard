@@ -8,6 +8,7 @@ import plotly.express as px
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from models import models
 
+
 def header():
     header_layout = html.Div(
         id='header',
@@ -64,7 +65,7 @@ def drop_down():
         options=[
             {'label': 'Inflation & Energy Prices', 'value': 'Commodity Prices'},
             {'label': 'Energy Dependence by Region', 'value': 'Energy Dependence'},
-            {'label': 'CPI & Oil Price Forecasting', 'value': 'Forecasting'},
+            {'label': 'Forecasting', 'value': 'Forecasting'},
             #{'label': 'Consumer Spending and CPI', 'value': 'Consumer Spending'}
         ],
         value='Commodity Prices',
@@ -361,7 +362,6 @@ def cd_chart(df1, df2,prod_cons,title=None, x_axis=None, y_axis=None):
     df_long_2 = df_long_2.melt(id_vars=['year'], value_vars=df_long_2.columns[1:], value_name=prod_cons)
 
     df_merge = df_long_2.merge(df_long, how='left', on=['year', 'variable'])
-    print(df_merge)
 
     df_merge = df_merge.sort_values(by=['year', prod_cons], ascending=[True, True])
 
