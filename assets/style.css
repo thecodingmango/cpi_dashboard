@@ -150,20 +150,6 @@ body {
     margin: 10px;
 }
 
-.stl_chart {
-    background-color: #252a3b;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    color: white;
-    display: flex;
-    width: 93.5%;
-    flex-direction: column;
-    margin: 10px;
-    align-items: center;
-}
-
-
 
 
 

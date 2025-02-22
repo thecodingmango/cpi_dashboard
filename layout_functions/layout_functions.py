@@ -7,8 +7,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from models import models
-from plotly.subplots import make_subplots
-from statsmodels.graphics.tsaplots import acf, pacf
 
 
 def header():
@@ -72,28 +70,6 @@ def drop_down():
         ],
         value='Commodity Prices',
         clearable=False
-    )
-
-    return menu
-
-def drop_down_2():
-
-    menu = html.Div(
-        children=[
-            html.Label("Select a Time Series:"),
-            dcc.Dropdown(
-                id='forecasting_series',
-                options=[
-                    {'label': 'CPI', 'value': 'Cpi Values'},
-                    {'label': 'Trend', 'value': 'trend'},
-                    {'label': 'Seasonal', 'value': 'seasonal'},
-                    {'label': 'Residuals', 'value': 'residuals'}
-                ],
-                value='Cpi Values',  # Default selection
-                clearable=False
-            )
-        ],
-        className='drop_down_menu'
     )
 
     return menu
@@ -410,84 +386,6 @@ def cd_chart(df1, df2,prod_cons,title=None, x_axis=None, y_axis=None):
         yaxis=dict(title=y_axis, range=[0, 6],showgrid=False),
         legend=dict(title='Country'),
         transition={"duration": 500, "easing": "cubic-in-out"}
-    )
-
-    return fig
-
-def stl_chart(data):
-
-    fig_subplot = make_subplots(rows=3, cols=1, shared_xaxes=True,
-                                subplot_titles=["Trend", "Seasonal", "Residual"])
-
-    fig_subplot.add_trace(
-        go.Scatter(
-            x=data["year_month"],
-            y=data["trend"],
-            mode="lines",
-            name="Trend"),
-        row=1,
-        col=1)
-    fig_subplot.add_trace(
-        go.Scatter(
-            x=data["year_month"],
-            y=data["seasonal"],
-            mode="lines",
-            name="Seasonal"),
-        row=2,
-        col=1)
-    fig_subplot.add_trace(
-        go.Scatter(
-            x=data["year_month"],
-            y=data["residuals"],
-            mode="markers",
-            name="Residuals"),
-        row=3,
-        col=1)
-
-    fig_subplot.update_layout(
-        title="STL Decomposition" ,
-        height=700,
-        plot_bgcolor="#252a3b",
-        paper_bgcolor="#1E1E2F",
-        font=dict(color="white"),
-    )
-
-    return fig_subplot
-
-def acf_pacf_plot(data, column, lag):
-
-    acf_values = acf(data[column], nlags=lag, fft=True)
-    pacf_values = pacf(data[column], nlags=lag)
-
-    fig = make_subplots(rows=2, cols=1,
-                        subplot_titles=["Autocorrelation Function (ACF)", "Partial Autocorrelation Function (PACF)"])
-
-    fig.add_trace(
-        go.Bar(
-            x=list(range(lag + 1)),
-            y=acf_values,
-            name='ACF'
-        ),
-        row=1,
-        col=1
-    )
-
-    fig.add_trace(
-        go.Bar(
-            x=list(range(lag + 1)),
-            y=pacf_values,
-            name='ACF'
-        ),
-        row=1,
-        col=1
-    )
-
-    fig.update_layout(
-        title=f"ACF & PACF of {column}",
-        height=700,
-        plot_bgcolor="#252a3b",
-        paper_bgcolor="#1E1E2F",
-        font=dict(color="white"),
     )
 
     return fig
