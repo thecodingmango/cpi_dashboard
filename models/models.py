@@ -199,17 +199,30 @@ class Model:
         df_forecast = pd.DataFrame(forecast_list)
         return df_forecast
 
+    def year_month_index(self, df):
+        print(df)
+        df['year_month'] = pd.date_range(
+            df['year_month'].min(),
+            df['year_month'].max(),
+            freq='MS').strftime('%Y-%m')
+        df.reset_index()
+        df.set_index('year_month', inplace=True)
+
+        return df
+
     def model_building(self):
 
-        lag = list(range(1, 12))
+        lag = list(range(1, 13))
         self.y = self.lag_features(self.y.iloc[:, :-1], lag, False)
         self.y['year_month'] = self.data['year_month'].copy()
-        self.y['year_month'] = pd.date_range(
-            self.y['year_month'].min(),
-            self.y['year_month'].max(),
-            freq='MS').strftime('%Y-%m')
-        self.y.reset_index()
-        self.y.set_index('year_month', inplace=True)
+        print(self.y)
+        self.y = self.year_month_index(self.y)
+        # pd.date_range(
+        #     self.y['year_month'].min(),
+        #     self.y['year_month'].max(),
+        #     freq='MS').strftime('%Y-%m')
+        # self.y.reset_index()
+        # self.y.set_index('year_month', inplace=True)
         x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.2)
 
         # Linear Regression Model
@@ -222,14 +235,9 @@ class Model:
         print(lr_forecast)
 
         self.y = self.data.copy()
-        self.y['year_month'] = pd.date_range(
-            self.y['year_month'].min(),
-            self.y['year_month'].max(),
-            freq='MS').strftime('%Y-%m')
-        self.y.reset_index()
-        self.y.set_index('year_month', inplace=True)
+        self.y = self.year_month_index(self.y)
         x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.1)
-        arima = self.sarimax(y_train, 12 ,0, 12, (0,0,0,0))
+        arima = self.sarimax(y_train, 12 ,0, 12, (0,0,0,12))
         arima_pred = arima.predict(start=y_test.index[0], end=y_test.index[-1])
         arima_train_metrics = self.metric(y_train, arima.predict(start=y_train.index[0], end=y_train.index[-1]))
         arima_test_metrics = self.metric(y_test, arima_pred)
@@ -254,7 +262,7 @@ model = Model(df=data, y='PPI Values')
 #model = model.min_max_transform(['Cpi Values', 'PPI Values'])
 #x_train, x_test, y_train, y_test = model.train_test_split(test_prop=0.2)
 #test_lag = model.lag_features(data,[1, 3, 6, 12], True)
-#model.model_building()
+model.model_building()
 
 
 

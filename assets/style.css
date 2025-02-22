@@ -94,17 +94,36 @@ body {
 }
 
 .main_top {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    justify-content: right;
     width: 100%;
     margin-bottom: 15px;
 }
 
-.drop_down_menu {
-    display: inline-block;
+.date_picker_container {
     width: 250px;
     margin-left: auto;
     margin-right: 50px;
+    font-size: 15px;
+    background-color: #252a3b;
+    color: white;
+    border-radius: 5px;
+    margin-top:10px;
+}
+
+.drop_down_menu {
+    width: 250px;
+    margin-left: auto;
+    margin-right: 50px;
+    font-size: 15px;
+    background-color: #333544;
+    color: black;
+    border-radius: 5px;
+    margin-top:10px;
+}
+
+.drop_down_menu_2 {
+    width: 250px;  /* Small gap from the first dropdown */
     font-size: 15px;
     background-color: #333544;
     color: black;

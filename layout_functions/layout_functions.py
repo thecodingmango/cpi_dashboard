@@ -2,7 +2,6 @@
 import pandas as pd
 from dash import html
 from dash import dcc
-from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
@@ -77,23 +76,16 @@ def drop_down():
     return menu
 
 def drop_down_2():
-
-    menu = html.Div(
-        children=[
-            html.Label("Select a Time Series:"),
-            dcc.Dropdown(
-                id='forecasting_series',
-                options=[
-                    {'label': 'CPI', 'value': 'Cpi Values'},
-                    {'label': 'Trend', 'value': 'trend'},
-                    {'label': 'Seasonal', 'value': 'seasonal'},
-                    {'label': 'Residuals', 'value': 'residuals'}
-                ],
-                value='Cpi Values',  # Default selection
-                clearable=False
-            )
+    menu = dcc.Dropdown(
+        id='forecasting_series',
+        options=[
+            {'label': 'CPI', 'value': 'Cpi Values'},
+            {'label': 'Trend', 'value': 'trend'},
+            {'label': 'Seasonal', 'value': 'seasonal'},
+            {'label': 'Residuals', 'value': 'residuals'}
         ],
-        className='drop_down_menu'
+        value='Cpi Values',  # Default selection
+        clearable=False
     )
 
     return menu
@@ -478,7 +470,7 @@ def acf_pacf_plot(data, column, lag):
             y=pacf_values,
             name='ACF'
         ),
-        row=1,
+        row=2,
         col=1
     )
 

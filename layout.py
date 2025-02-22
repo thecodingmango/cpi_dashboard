@@ -3,6 +3,7 @@ import dash
 from dash import dash_table
 from layout_functions.layout_functions import *
 from datetime import datetime, timedelta
+from dash.dependencies import Input, Output, State
 
 # Using apis to import data
 '''
@@ -31,6 +32,9 @@ eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
 eia_emission = pd.read_csv('./data/eia_emission.csv')
 eia_emission.iloc[:, 1] = eia_emission.iloc[:, 1] / 30
 stl_data = pd.read_csv('./data/stl.csv')
+merged_df = bls_data.drop('Unnamed: 0', axis=1).merge(
+    bls_gas.drop('Unnamed: 0', axis=1), how='left', on='year_month')
+merged_df = merged_df.merge(eia_petroleum_spot.drop('Unnamed: 0', axis=1), how='left', on='year_month')
 
 external_stylesheets = [
     {
@@ -111,9 +115,14 @@ app.layout = html.Div(
                             className='main_top',
                             children=[
                                 date_picker(bls_data),
-                                drop_down()
+                                drop_down(),
+                                html.Div(
+                                    id='forecasting_series'
+                                ),
                             ]
                         ),
+
+
                         # CPI chart
                         html.Div(
                             dcc.Loading(type='circle', children=[
@@ -132,19 +141,45 @@ app.layout = html.Div(
 )
 
 
+@app.callback(
+    Output('forecasting_series', 'children'),
+    Input('drop_down_menu', 'value')
+)
+def forecasting_dropdown(value):
+    """Dynamically generates the forecasting series dropdown when Forecasting is selected."""
+
+    if value == 'Forecasting':
+        return html.Div(
+            dcc.Dropdown(
+            options=[
+                {'label': 'CPI', 'value': 'Cpi Values'},
+                {'label': 'Trend', 'value': 'trend'},
+                {'label': 'Seasonal', 'value': 'seasonal'},
+                {'label': 'Residuals', 'value': 'residuals'}
+            ],
+            value='Cpi Values',  # Default selection
+            clearable=False
+            ),
+            className='drop_down_menu_2'
+        )
+    else:
+        return html.Div()
+
 # App callback used for updating the values in the function
 @app.callback(
     [
         Output('charts_container', 'children'),
-        Output('descriptive_stats_table', 'data')
+        Output('descriptive_stats_table', 'data'),
     ],
     [
         Input('start_month', 'value'),
         Input('end_month', 'value'),
-        Input('drop_down_menu', 'value')
+        Input('drop_down_menu', 'value'),
+        Input('forecasting_series', 'children')
     ]
 )
-def update_chart(start_date, end_date, value):
+def update_chart(start_date, end_date, value, value_2):
+
     filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
     filtered_data_bls = bls_data.loc[filters_date_bls, :]
 
@@ -198,7 +233,7 @@ def update_chart(start_date, end_date, value):
 
     if value == 'Commodity Prices':
 
-        chart_layout.clear()
+        chart_layout = []
 
         fig_cpi = go.Figure()
         dual_axis_line_chart(
@@ -275,7 +310,8 @@ def update_chart(start_date, end_date, value):
 
     elif value == 'Energy Dependence':
 
-        chart_layout.clear()
+        chart_layout = []
+
         fig_production = map_graph(
             eia_api_crude_production.copy(),
             'Million Barrels/Day',
@@ -345,8 +381,8 @@ def update_chart(start_date, end_date, value):
                 children=[
                     dcc.Interval(),
                     html.Div(dcc.Markdown('''
-                            # Talk about this page
-                            ''')),
+                                # Talk about this page
+                                ''')),
                     html.Div(children=[
                         dcc.Graph(figure=fig_production, className='map'),
                         dcc.Graph(figure=fig_consumption, className='map')]
@@ -361,28 +397,22 @@ def update_chart(start_date, end_date, value):
                 ]
             )
 
-
         ]
 
-
     elif value == 'Forecasting':
-        print(filtered_data_bls.drop('Unnamed: 0', axis=1))
-
-        merged_df = filtered_data_bls.drop('Unnamed: 0', axis=1).merge(
-            filtered_bls_gas.drop('Unnamed: 0', axis=1), how='left', on='year_month')
-        merged_df = merged_df.merge(eia_petro_price.drop('Unnamed: 0', axis=1), how='left', on='year_month')
 
         chart_layout.clear()
         fig_forecast_line = go.Figure()
-        line_graph(fig_forecast_line, filtered_data_bls, 'year_month', 'Cpi Values')
+        line_graph(fig_forecast_line, filtered_data_bls, 'year_month', 'PPI Values')
 
 
 
         chart_layout = [
-            html.Div(),
-            html.Div(dcc.Graph(figure=fig_forecast_line, className='full_card')), # Line chart
-            html.Div(dcc.Graph(figure=stl_chart(stl_data), className='stl_chart')),
-            html.Div(dcc.Graph(figure=acf_pacf_plot(stl_data), className='stl_chart')),  # ACF, PACF
+            html.Div(dcc.Interval()),
+            html.Div(dcc.Graph(figure=fig_forecast_line, className='full_card')),  # Line chart
+            html.Div(dcc.Graph(figure=stl_chart(stl_data), className='stl_chart')),  # STL
+            html.Div(dcc.Graph(figure=acf_pacf_plot(merged_df, 'PPI Values', lag=100),
+                               className='stl_chart')),  # ACF, PACF
             html.Div()
         ]
 
