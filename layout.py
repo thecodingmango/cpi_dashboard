@@ -3,7 +3,7 @@ import dash
 from dash import dash_table
 from layout_functions.layout_functions import *
 from datetime import datetime, timedelta
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
 # Using apis to import data
 '''
@@ -71,9 +71,11 @@ app.layout = html.Div(
                         
                         Website: [TheCodingMango](https://thecodingmango.com/)
                         
-                        Retrieving Data using EIA API: [How to Retrieve Data from the EIA Website](https://thecodingmango.com/updating-data-for-cpi-dashboard-part-2/)
+                        Retrieving Data using EIA API: [How to Retrieve Data from the EIA Website]
+                        (https://thecodingmango.com/updating-data-for-cpi-dashboard-part-2/)
                         
-                        Retrieving Data using BLS API: [How to Retrieve Data from the BLS Website](https://thecodingmango.com/updating-data-for-cpi-dashboard-part-1/)
+                        Retrieving Data using BLS API: [How to Retrieve Data from the BLS Website]
+                        (https://thecodingmango.com/updating-data-for-cpi-dashboard-part-1/)
                     '''
                         ),
                         html.Hr(),

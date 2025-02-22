@@ -13,15 +13,13 @@ import pandas as pd
 import numpy as np
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.stattools import adfuller
-import statsmodels.api as sm
 from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from xgboost import XGBRegressor
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from statsmodels.tsa.vector_ar.var_model import forecast
 from statsmodels.tsa.seasonal import STL
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 
 
 class Model:
@@ -124,6 +122,15 @@ class Model:
 
         return new_df.dropna()
 
+    def seasonal_naives(self, steps):
+
+        new_df = self.y.iloc[-steps:][self.target].copy()
+        future_dates = pd.date_range(start=new_df.index[-1][:4] + '-2',
+                                     periods=steps, freq='MS').strftime('%Y-%m')
+        new_df = pd.DataFrame({self.target: new_df.values}, index=future_dates)
+
+        return new_df
+
     def linear_regression(self, x_train, y_train):
 
         lr = LinearRegression()
@@ -160,8 +167,39 @@ class Model:
 
         return results
 
-    def xgbarimax(self):  # XGBoost + ARIMA
-        pass
+    def xgboost(self, x_train, y_train):
+
+        param_grid = {
+            'learning_rate': [0.001, 0.1, 0.3, 0.5, 1],
+            'max_depth': [3, 5, 7],
+            'lambda': [0, 1, 10, 30, 50, 100, 200, 1000, 2000],
+            'alpha': [0, 1, 5, 10, 50, 100]
+        }
+
+        grid_serach = GridSearchCV(
+            estimator=XGBRegressor(objective="reg:squarederror"),
+            param_grid=param_grid,
+            scoring='neg_mean_squared_error',
+            cv=TimeSeriesSplit(n_splits=2)
+        )
+
+        best_param = grid_serach.fit(x_train, y_train).best_params_
+        print(best_param)
+
+        param = {
+            'objective': "reg:squarederror",
+            'eval_metric': 'rmse',
+            'n_estimators': 400,
+            'learning_rate': best_param['learning_rate'],
+            'max_depth': best_param['max_depth'],
+            'lambda': best_param['lambda'],
+            'alpha': best_param['alpha']
+        }
+
+        xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
+        xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train)], verbose=0)
+
+        return xgb_model
 
     def iterative_forecast(self, ts_model, df_history, horizon):
 
@@ -213,7 +251,7 @@ class Model:
         self.y = self.lag_features(self.y.iloc[:, :-1], lag, False)
         self.y['year_month'] = self.data['year_month'].copy()
         self.y = self.year_month_index(self.y)
-        x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.1)
+        x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.2)
 
         # Linear Regression Model
         lr_model = self.linear_regression(x_train, y_train)
@@ -224,29 +262,51 @@ class Model:
         print(lr_pred, '\n', lr_metrics)
         print(lr_forecast)
 
+        # Naives
+        s_naives = self.seasonal_naives(max(lag))
+        print(s_naives)
+
+        # XGBoost
+        xgb_model = self.xgboost(x_train, y_train)
+        xgb_forecast = self.iterative_forecast(xgb_model,x_test, 12)
+
+        # SARIMA
         self.y = self.data.copy()
         self.y = self.year_month_index(self.y)
         x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.1)
-        arima = self.sarimax(y_train, self.order[0] ,self.order[1], self.order[2],self.s_order, trend='ct')
-        arima_pred = arima.predict(start=y_test.index[0], end=y_test.index[-1])
+
+        # arima = self.sarimax(y_train, self.order[0] ,self.order[1], self.order[2],self.s_order, trend='ct')
+        # arima_pred = arima.predict(start=y_test.index[0], end=y_test.index[-1])
         # # arima_train_metrics = self.metric(y_train, arima.predict(start=y_train.index[0], end=y_train.index[-1]))
         # arima_test_metrics = self.metric(y_test, arima_pred)
-        print(arima_pred)
+        # print(arima_pred)
         # #print(arima_test_metrics)
 
         # Final SARIMA model
         arima = self.sarimax(pd.concat([y_train, y_test], axis=0),
                              self.order[0] ,self.order[1], self.order[2],self.s_order, trend='ct')
-        print(self.metric(pd.concat([y_train, y_test], axis=0),
-                          arima.predict(start=pd.concat([y_train, y_test], axis=0).index[0],
-                                         end=pd.concat([y_train, y_test], axis=0).index[-1])))
-        arima_forecast = arima.forecast(steps=12)
-        print(arima_forecast)
+        # print(self.metric(pd.concat([y_train, y_test], axis=0),
+        #                   arima.predict(start=pd.concat([y_train, y_test], axis=0).index[0],
+        #                                  end=pd.concat([y_train, y_test], axis=0).index[-1])))
+        arima_forecast = arima.get_forecast(steps=12)
+        print(arima.forecast(steps=12))
 
+        # XGBoost + SARIMA
+        new_df = pd.concat([self.y.copy()[self.target], arima.resid, arima.fittedvalues], axis=1)
+        new_df.columns = [self.target, 'arima_resid', 'arima_fitted_values']
+        y_train_2 = new_df.iloc[max(lag):]['arima_resid']
+        x_train_2 = self.lag_features(new_df, lag, remove_original=True)
+        xgb_sarima = self.xgboost(x_train_2, y_train_2)
+        #print(xgb_sarima)
+        resid_forecast = self.iterative_forecast(xgb_sarima, x_train_2, 12)
+        # Ensure both are Pandas Series
+        final_xgb_arima= (arima_forecast.predicted_mean.reset_index().iloc[:, 1]+
+                          resid_forecast.reset_index().iloc[:, 1])
+        print(final_xgb_arima)
 
 data = pd.read_csv('./data/bls_food.csv')
 #model = Model(df=data, y='Cpi Values')
-model = Model(df=data, y='Unemployment', order=(0, 1, 0), seasonal_order=(0, 0, 0, 0))
+model = Model(df=data, y='Eggs', order=(1, 1, 1), seasonal_order=(2, 0, 0, 12))
 #stl_1 = model.stl(data)
 #stl_1.to_csv('stl.csv')
 #model.acf('Cpi Values', lag=100)
