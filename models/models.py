@@ -74,45 +74,28 @@ class Model:
 
         return new_df
 
-    def min_max_transform(self, columns):
+    def min_max_transform(self, df, reverse=False):
 
-        for item in columns:
-            self.data[item] = ((self.data[item] - self.data[item].min()) /
-                               (self.data[item].max() - self.data[item].min()))
+        if not reverse:
+            for col in df.columns:
+                df[col] = ((df[col] - df[col].min()) / (df[col].max() - df[col].min()))
+        else:
+            for col in df.columns:
+                df[col] = (df[col].max() - df[col].min()) / (df[col] - df[col].min())
 
-        return self.data
+        return df
 
-    def train_test_split(self, test_prop):
+    def train_test_split(self, target_col, test_prop):
 
         train_size = int(len(self.y) * (1 - test_prop))
 
         # Use iloc for position-based slicing
-        x_train = self.y.iloc[:train_size, self.y.columns != self.target]
-        x_test = self.y.iloc[train_size:, self.y.columns != self.target]
-        y_train = self.y.iloc[:train_size][self.target]
-        y_test = self.y.iloc[train_size:][self.target]
+        x_train = self.y.iloc[:train_size, self.y.columns != target_col]
+        x_test = self.y.iloc[train_size:, self.y.columns != target_col]
+        y_train = self.y.iloc[:train_size][target_col]
+        y_test = self.y.iloc[train_size:][target_col]
 
         return x_train, x_test, y_train, y_test
-
-    def acf(self, column, lag):
-
-        df = self.data.copy()
-        df.set_index('year_month', inplace=True)
-        ts = df[column]
-        ts_diff = df[column].diff(1)
-        ts_diff = ts_diff.dropna()
-
-        plot_acf(ts, lags=lag)
-        plt.savefig('acf.png')
-
-        plot_acf(ts_diff, lags=lag)
-        plt.savefig('acf_diff.png')
-
-        plot_pacf(ts_diff, lags=lag)
-        plt.savefig('pacf_diff.png')
-
-        plt.plot(ts_diff)
-        plt.savefig('ts_diff.png')
 
     def metric(self, y_true, y_pred):
 
@@ -125,8 +108,11 @@ class Model:
 
         for col in new_df.columns:
             for num in lag:
-                new_df[col + '_' + str(num)] = new_df[col].shift(num)
-
+                try:
+                    new_df[col + '_' + str(num)] = new_df[col].shift(num)
+                except AttributeError as e:
+                    new_df[col + '_' + str(num)] = new_df.shift(num)
+                    print(e)
             if remove_original:
                 new_df = new_df.drop(col, axis=1)
 
@@ -164,36 +150,41 @@ class Model:
 
         return results
 
-    def xgboost(self, x_train, y_train):
+    def xgboost(self, x_train, y_train, x_test=None, y_test=None):
 
-        param_grid = {
-            'learning_rate': [0.001, 0.1, 0.3, 0.5, 1],
-            'max_depth': [3, 5, 7],
-            'lambda': [0, 1, 10, 30, 50, 100, 200, 1000, 2000],
-            'alpha': [0, 1, 5, 10, 50, 100]
-        }
-
-        grid_serach = GridSearchCV(
-            estimator=XGBRegressor(objective="reg:squarederror"),
-            param_grid=param_grid,
-            scoring='neg_mean_squared_error',
-            cv=TimeSeriesSplit(n_splits=2)
-        )
-
-        best_param = grid_serach.fit(x_train, y_train).best_params_
+        # param_grid = {
+        #     'learning_rate': [0.1, 0.3, 0.5, 0.75],
+        #     'max_depth': [3, 5, 7],
+        #     'lambda': [10, 30, 50, 100, 1000, 5000, 10000],
+        #     'alpha': [1, 3, 5, 10]
+        # }
+        #
+        # grid_serach = GridSearchCV(
+        #     estimator=XGBRegressor(objective="reg:squarederror"),
+        #     param_grid=param_grid,
+        #     scoring='neg_mean_squared_error',
+        #     cv=TimeSeriesSplit(n_splits=2)
+        # )
+        #
+        # best_param = grid_serach.fit(x_train, y_train).best_params_
+        # print(best_param)
 
         param = {
             'objective': "reg:squarederror",
             'eval_metric': 'rmse',
             'n_estimators': 100,
-            'learning_rate': best_param['learning_rate'],
-            'max_depth': best_param['max_depth'],
-            'lambda': best_param['lambda'],
-            'alpha': best_param['alpha']
+            'learning_rate': 0.05, #best_param['learning_rate'],
+            'max_depth': 7, #best_param['max_depth'],
+            'lambda': 1, #best_param['lambda'],
+            'alpha': 1, #best_param['alpha']
         }
 
-        xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
-        xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train)], verbose=0)
+        if x_test is not None and y_test is not None:
+            xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
+            xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train), (x_test, y_test)], verbose=149)
+        else:
+            xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
+            xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train)], verbose=149)
 
         return xgb_model
 
@@ -218,11 +209,9 @@ class Model:
 
             n_cols = x_future.shape[1]
 
-            # Shift columns in descending order:
             for j in range(n_cols - 1, 0, -1):
                 x_future.iloc[0, j] = x_future.iloc[0, j - 1]
 
-            # Now put the new prediction into the first column
             x_future.iloc[0, 0] = pred
 
         df_forecast = pd.DataFrame(forecast_list)
@@ -242,111 +231,133 @@ class Model:
 
     def model_building(self):
 
+        s_t = stl(self.y.copy()[self.target])
         lag = list(range(1, 13))
+        self.y.iloc[:, 0] = self.y.iloc[:, 0] - s_t['seasonal'] - s_t['residuals']
         self.y['year_month'] = self.data['year_month'].copy()
         self.y = self.lag_features(self.y.iloc[:, :-1], lag, False)
         self.y['year_month'] = self.data['year_month'].copy()
         self.y = self.year_month_index(self.y)
-        x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.2)
+        x_train, x_test, y_train, y_test = self.train_test_split(self.target, test_prop=0.1)
 
-        # Linear Regression Model
-        lr_model = self.linear_regression(x_train, y_train)
-        lr_pred = lr_model.predict(x_test)
-        lr_metrics = self.metric(y_test, lr_pred)
-        lr_metrics['r2'] = r2_score(y_true=y_test, y_pred=lr_pred)
-        lr_forecast = self.iterative_forecast(lr_model, x_test, 12)
-        # print(lr_forecast)
-
-        # Seasonal Naives
-        s_naives = self.seasonal_naives(max(lag))
-        # print(s_naives)
-
-        # XGBoost
-        xgb_model = self.xgboost(x_train, y_train)
-        xgb_forecast = self.iterative_forecast(xgb_model, x_test, 12)
-        # print(xgb_forecast.reset_index())
-
+        # # Linear Regression Model
+        # lr_model = self.linear_regression(x_train, y_train)
+        # lr_pred = lr_model.predict(x_test)
+        # lr_trend = lr_pred[-12:]
+        # lr_metrics = self.metric(y_test, lr_pred)
+        # lr_metrics['r2'] = r2_score(y_true=y_test, y_pred=lr_pred)
+        # lr_forecast = pd.DataFrame(self.iterative_forecast(
+        #     lr_model, x_test, 12).reset_index().iloc[-12:, 1].values +
+        #                            s_t['residuals'].reset_index().iloc[-12:, 1].values +
+        #                            s_t['seasonal'].reset_index().iloc[-12:, 1].values)
+        #
+        # # Seasonal Naives
+        # s_naives = self.seasonal_naives(max(lag))
+        #
+        # # XGBoost
+        # self.y = pd.DataFrame(s_t['residuals'])
+        # self.y = self.lag_features(self.y, lag, False)
+        # x_train, x_test, y_train, y_test = self.train_test_split('residuals', test_prop=0.1)
+        # xgb_model = self.xgboost(x_train, y_train, x_test, y_test)
+        # xgb_metrics = self.metric(y_test, xgb_model.predict(x_test))
+        # print(xgb_metrics)
+        # xgb_forecast = self.iterative_forecast(xgb_model, x_test, 12)
+        # xgb_forecast = (pd.DataFrame(xgb_forecast.reset_index()).iloc[:, 1].values +
+        #                 lr_trend +
+        #                 s_t['seasonal'].reset_index().iloc[-12:, 1].values)
+        # xgb_forecast = pd.DataFrame(xgb_forecast)
+        #
         # SARIMA
         self.y = self.data.copy()
         self.y = self.year_month_index(self.y)
-        x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.1)
+        x_train, x_test, y_train, y_test = self.train_test_split(self.target, test_prop=0.1)
 
         # Final SARIMA model
         sarima = self.sarimax(pd.concat([y_train, y_test], axis=0),
                               self.order[0], self.order[1], self.order[2], self.s_order, trend='ct')
         sarima_forecast = sarima.forecast(steps=12)
 
+
         # XGBoost + SARIMA
-        new_df = pd.concat([self.y.copy()[self.target], sarima.resid, sarima.fittedvalues], axis=1)
-        new_df.columns = [self.target, 'arima_resid', 'arima_fitted_values']
-        y_train_2 = new_df.iloc[max(lag):]['arima_resid']
-        x_train_2 = self.lag_features(new_df, lag, remove_original=True)
-        xgb_sarima = self.xgboost(x_train_2, y_train_2)
-        resid_forecast = self.iterative_forecast(xgb_sarima, x_train_2, 12)
+        self.y = self.data.copy()
+        self.y = self.year_month_index(self.y)
+        self.y = pd.concat([sarima.resid, self.y.copy()[self.target], sarima.fittedvalues], axis=1)
+        self.y.columns = ['arima_resid', self.target, 'arima_fitted_values']
+        self.y = self.lag_features(self.y, lag, False)
+        print(self.y)
+        self.y = self.y.drop(columns=[self.target, 'arima_fitted_values'], axis=1)
+
+        x_train, x_test, y_train, y_test = self.train_test_split('arima_resid', test_prop=0.1)
+        xgb_sarima = self.xgboost(x_train, y_train, x_test, y_test)
+        print(self.metric(y_test, xgb_sarima.predict(x_test)))
+
+        resid_forecast = self.iterative_forecast(xgb_sarima, x_test, 12)
         final_xgb_arima = (sarima.get_forecast(steps=12).predicted_mean.reset_index().iloc[:, 1] +
                            resid_forecast.reset_index().iloc[:, 1])
-        # print(final_xgb_arima)
+        print(final_xgb_arima)
 
-        final_df = pd.DataFrame()
-        final_df['year_month'] = pd.date_range(start=self.y.index[-1][:4] + '-2',
-                                               periods=max(lag), freq='MS').strftime('%Y-%m')
-        final_df = pd.concat([
-            final_df,
-            lr_forecast.reset_index().iloc[:, 1],
-            s_naives.reset_index().iloc[:, 1],
-            xgb_forecast.reset_index().iloc[:, 1],
-            sarima_forecast.reset_index().iloc[:, 1],
-            final_xgb_arima.reset_index().iloc[:, 1],
-        ], axis=1)
-        final_df.columns = [
-            'year_month',
-            self.target + ' Linear Regression Forecast',
-            self.target + ' Seasonal Naives Forecast',
-            self.target + ' XGBoost Forecast',
-            self.target + ' SARIMA Forecast',
-            self.target + ' SARIMA' + ' & XGBoost Forecast'
-        ]
-
-        return final_df
+        # final_df = pd.DataFrame()
+        # final_df['year_month'] = pd.date_range(start=self.y.index[-1][:4] + '-2',
+        #                                        periods=max(lag), freq='MS').strftime('%Y-%m')
+        # final_df = pd.concat([
+        #     final_df,
+        #     lr_forecast.reset_index().iloc[:, 1],
+        #     s_naives.reset_index().iloc[:, 1],
+        #     xgb_forecast.reset_index().iloc[:, 1],
+        #     sarima_forecast.reset_index().iloc[:, 1],
+        #     final_xgb_arima.reset_index().iloc[:, 1],
+        # ], axis=1)
+        # final_df.columns = [
+        #     'year_month',
+        #     self.target + ' Linear Regression Forecast',
+        #     self.target + ' Seasonal Naives Forecast',
+        #     self.target + ' XGBoost Forecast',
+        #     self.target + ' SARIMA Forecast',
+        #     self.target + ' SARIMA' + ' & XGBoost Forecast'
+        # ]
+        #
+        # return final_df
 
 # Testing purposes
-#data = pd.read_csv('./data/bls_food.csv')
-#model = Model(df=data, y='Cpi Values', order=(1, 2, 3), seasonal_order=(0, 0, 0, 0))
-#stl_1 = model.stl(data)
-#stl_1.to_csv('stl.csv')
-#model.acf('Cpi Values', lag=100)
-#model.check_stationarity(data)
-#test_diff = model.check_stationarity(model.data)
-#model = model.min_max_transform(['Cpi Values', 'PPI Values'])
-#x_train, x_test, y_train, y_test = model.train_test_split(test_prop=0.1)
-#test_lag = model.lag_features(data,[1, 3, 6, 12], True)
-#model.model_building()
+data = pd.read_csv('./data/bls_food.csv')
+model = Model(df=data, y='PPI Values', order=(1, 1, 0), seasonal_order=(1, 0, 0, 12))
+# #stl_1 = model.stl(data)
+# #stl_1.to_csv('stl.csv')
+# #model.acf('Cpi Values', lag=100)
+# #model.check_stationarity(data)
+# #test_diff = model.check_stationarity(model.data)
+# #model = model.min_max_transform(['Cpi Values', 'PPI Values'])
+# #x_train, x_test, y_train, y_test = model.train_test_split(test_prop=0.1)
+# #test_lag = model.lag_features(data,[1, 3, 6, 12], True)
+test_model = model.model_building()
 
-# # Commented out to conserve computational power
-dataset = [
-    './data/bls_food.csv',
-    './data/bls_gas_price.csv',
-    './data/eia_crude_price.csv'
-]
+# Commented out to conserve computational power
+# dataset = [
+#     './data/bls_food.csv',
+#     './data/bls_gas_price.csv',
+#     './data/eia_crude_price.csv'
+# ]
 
-sarima_order = {
-    'Cpi Values' : [(7, 2, 0), (2, 0, 0, 12)],
-    'PPI Values': [(3, 1, 2), (2, 0, 0, 12)],
-    'Unemployment': [(0,1,0), (0, 0, 0, 0)],
-    'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
-    'UK Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
-    'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
-}
-
-result = pd.DataFrame()
-
-for path in dataset:
-    data = pd.read_csv(path)
-    for column in data.columns[1:-1]:
-        if column in sarima_order:
-            model = Model(data, y=column, order=sarima_order[column][0],
-                          seasonal_order=sarima_order[column][1])
-            output = model.model_building()
-            result = pd.concat([result, output], axis=1)
-
-result.to_csv('./data/forecast_data.csv')
+# Found using auto.arima in R
+# sarima_order = {
+#     'Cpi Values' : [(1, 2, 2), (2, 0, 0, 12)],
+#     'PPI Values': [(1, 1, 0), (1, 0, 0, 12)],
+#     'Unemployment': [(0,1,0), (0, 0, 0, 0)],
+#     'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
+#     'UK Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
+#     'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
+# }
+#
+# result = pd.DataFrame()
+#
+# for path in dataset:
+#     data = pd.read_csv(path)
+#     for column in data.columns[1:-1]:
+#         if column in sarima_order:
+#             print(f'Currently Modeling: {column}')
+#             model = Model(data, y=column, order=sarima_order[column][0],
+#                           seasonal_order=sarima_order[column][1])
+#             output = model.model_building()
+#             result = pd.concat([result, output], axis=1)
+#
+# result.to_csv('./data/forecast_data.csv')
