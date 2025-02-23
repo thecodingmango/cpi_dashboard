@@ -1,9 +1,8 @@
-import json
 import dash
 from dash import dash_table
 from layout_functions.layout_functions import *
 from datetime import datetime, timedelta
-from dash.dependencies import Input, Output, State, MATCH, ALL
+from dash.dependencies import Input, Output
 
 # Using apis to import data
 '''
