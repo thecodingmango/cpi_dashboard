@@ -166,30 +166,30 @@ class Model:
 
     def xgboost(self, x_train, y_train):
 
-        # param_grid = {
-        #     'learning_rate': [0.001, 0.1, 0.3, 0.5, 1],
-        #     'max_depth': [3, 5, 7],
-        #     'lambda': [0, 1, 10, 30, 50, 100, 200, 1000, 2000],
-        #     'alpha': [0, 1, 5, 10, 50, 100]
-        # }
-        #
-        # grid_serach = GridSearchCV(
-        #     estimator=XGBRegressor(objective="reg:squarederror"),
-        #     param_grid=param_grid,
-        #     scoring='neg_mean_squared_error',
-        #     cv=TimeSeriesSplit(n_splits=2)
-        # )
-        #
-        # best_param = grid_serach.fit(x_train, y_train).best_params_
+        param_grid = {
+            'learning_rate': [0.001, 0.1, 0.3, 0.5, 1],
+            'max_depth': [3, 5, 7],
+            'lambda': [0, 1, 10, 30, 50, 100, 200, 1000, 2000],
+            'alpha': [0, 1, 5, 10, 50, 100]
+        }
+
+        grid_serach = GridSearchCV(
+            estimator=XGBRegressor(objective="reg:squarederror"),
+            param_grid=param_grid,
+            scoring='neg_mean_squared_error',
+            cv=TimeSeriesSplit(n_splits=2)
+        )
+
+        best_param = grid_serach.fit(x_train, y_train).best_params_
 
         param = {
             'objective': "reg:squarederror",
             'eval_metric': 'rmse',
-            'n_estimators': 1,  #300,
-            'learning_rate': 1,  #best_param['learning_rate'],
-            'max_depth': 1,  #best_param['max_depth'],
-            'lambda': 1,  #best_param['lambda'],
-            'alpha': 1,  #best_param['alpha']
+            'n_estimators': 300,
+            'learning_rate': best_param['learning_rate'],
+            'max_depth': best_param['max_depth'],
+            'lambda': best_param['lambda'],
+            'alpha': best_param['alpha']
         }
 
         xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
@@ -323,32 +323,30 @@ class Model:
 #model.model_building()
 
 # Commented out to conserve computational power
-# dataset = [
-#     './data/bls_food.csv',
-#     './data/bls_gas_price.csv',
-#     './data/eia_crude_price.csv'
-# ]
-#
-# sarima_order = {
-#     'Cpi Values' : [(7, 2, 0), (2, 0, 0, 12)],
-#     'PPI Values': [(3, 1, 2), (2, 0, 0, 12)],
-#     'Unemployment': [(0,1,0), (0, 0, 0, 0)],
-#     'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
-#     'UK.Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
-#     'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
-# }
-#
-# result = pd.DataFrame()
-# result['year_month'] = []
-#
-#
-# for path in dataset:
-#     data = pd.read_csv(path)
-#     for column in data.columns[1:-1]:
-#         if column in sarima_order:
-#             model = Model(data, y=column, order=sarima_order[column][0],
-#                           seasonal_order=sarima_order[column][1])
-#             output = model.model_building()
-#             result = result.merge(output, how='outer', on='year_month')
-#
-# result.to_csv('./data/forecast_data.csv')
+dataset = [
+    './data/bls_food.csv',
+    './data/bls_gas_price.csv',
+    './data/eia_crude_price.csv'
+]
+
+sarima_order = {
+    'Cpi Values' : [(7, 2, 0), (2, 0, 0, 12)],
+    'PPI Values': [(3, 1, 2), (2, 0, 0, 12)],
+    'Unemployment': [(0,1,0), (0, 0, 0, 0)],
+    'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
+    'UK.Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
+    'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
+}
+
+result = pd.DataFrame()
+
+for path in dataset:
+    data = pd.read_csv(path)
+    for column in data.columns[1:-1]:
+        if column in sarima_order:
+            model = Model(data, y=column, order=sarima_order[column][0],
+                          seasonal_order=sarima_order[column][1])
+            output = model.model_building()
+            result = result.concat([result, output], axis=1)
+
+result.to_csv('./data/forecast_data.csv')

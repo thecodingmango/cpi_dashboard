@@ -90,7 +90,7 @@ def drop_down_2():
     return menu
 
 
-def line_graph(fig, data, x, y, title=None, x_axis=None, y_axis=None):
+def line_graph(fig, data, x, y, title=None, x_axis=None, y_axis=None, mode=None, line=None):
     fig.add_trace(go.Scatter(
         x=data[x],
         y=data[y],

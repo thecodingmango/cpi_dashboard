@@ -34,6 +34,7 @@ eia_emission.iloc[:, 1] = eia_emission.iloc[:, 1] / 30
 merged_df = bls_data.drop('Unnamed: 0', axis=1).merge(
     bls_gas.drop('Unnamed: 0', axis=1), how='left', on='year_month')
 merged_df = merged_df.merge(eia_petroleum_spot.drop('Unnamed: 0', axis=1), how='left', on='year_month')
+forecast_data = pd.read_csv('./data/forecast_data.csv')
 
 external_stylesheets = [
     {
@@ -138,24 +139,6 @@ app.layout = html.Div(
     className='wrapper'
 )
 
-@app.callback(
-    Output('forecasting_graph', 'children'),
-    [Input('start_month', 'value'),
-     Input('end_month', 'value'),
-     Input('forecasting_dropdown', 'value')],
-    prevent_initial_update=True
-)
-def updating_forecasting_graph(start_date, end_date, value):
-
-    filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
-    filtered_merged_data = merged_df.loc[filters_date_bls, :]
-
-    fig_forecast_line = go.Figure()
-    line_graph(fig_forecast_line, filtered_merged_data, 'year_month', value)
-
-    return dcc.Graph(figure=fig_forecast_line, className='full_card')
-
-
 # App callback used for updating the values in the function
 @app.callback(
     [
@@ -191,12 +174,6 @@ def update_chart(start_date, end_date, value):
     eia_oil_production = eia_api_crude_production.loc[eia_filter_production, :]
 
     chart_layout = []
-
-    print(json.dumps({
-        'states': dash.ctx.states,
-        'triggered': dash.ctx.triggered,
-        'inputs': dash.ctx.inputs
-    }, indent=2))
 
     def get_summary(df, column):
         if column not in df:
@@ -400,8 +377,6 @@ def update_chart(start_date, end_date, value):
 
     elif value == 'Forecasting':
 
-        stl_data = filtered_merged_data
-
         chart_layout = [
             html.Div(
                 dcc.Dropdown(
@@ -411,7 +386,8 @@ def update_chart(start_date, end_date, value):
                         {'label': 'Producer Price Index', 'value': 'PPI Values'},
                         {'label': 'Unemployment Rate', 'value': 'Unemployment'},
                         {'label': 'Unleaded Gasoline', 'value': 'Unleaded Gasoline'},
-                        {'label': 'UK Brent Prices', 'value': 'WTI Prices'}
+                        {'label': 'UK Brent Prices', 'value': 'UK Brent Prices'},
+                        {'label': 'WTI Prices', 'value': 'WTI Prices'}
                     ],
                     value='Cpi Values',  # Default selection
                     clearable=False
@@ -419,11 +395,7 @@ def update_chart(start_date, end_date, value):
                 className='drop_down_menu_2'
             ),
             html.Div(dcc.Interval()),
-            html.Div(id='forecasting_graph'),  # Line chart
-            html.Div(dcc.Graph(figure=stl_chart(stl_data, x='year_month', y='Cpi Values'), className='stl_chart')),  # STL
-            html.Div(dcc.Graph(figure=acf_pacf_plot(merged_df, 'PPI Values', lag=100),
-                               className='stl_chart')),  # ACF, PACF
-            html.Div()
+            html.Div(id='forecasting_graph container'),  # Line chart
         ]
 
     else:  # Reserved for the future
@@ -432,6 +404,48 @@ def update_chart(start_date, end_date, value):
 
     return [chart_layout, table_data]
 
+@app.callback(
+    Output('forecasting_graph container', 'children'),
+    [Input('start_month', 'value'),
+     Input('end_month', 'value'),
+     Input('forecasting_dropdown', 'value')],
+    prevent_initial_update=True
+)
+def updating_forecasting_graph(start_date, end_date, value):
+
+    filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
+    filtered_merged_data = merged_df.loc[filters_date_bls, :]
+    filtered_forecast_data = forecast_data.loc[filters_date_bls, :]
+    stl_data = filtered_merged_data
+
+    forecasting_column = [col for col in filtered_forecast_data.columns if value in col]
+    forecasting_data = filtered_forecast_data[['year_month'] + forecasting_column]
+    print(forecasting_data)
+
+    fig_forecast_line = go.Figure()
+    line_graph(fig_forecast_line, filtered_merged_data, 'year_month', value)
+
+    for column in forecasting_column:
+
+        line_graph(
+            fig_forecast_line,
+            data=forecasting_data,
+            x='year_month',
+            y=column,
+            mode='line',
+            title='Forecasting ' + value,
+            x_axis='year',
+            y_axis='Value'
+        )
+
+    return html.Div(
+        children=[
+            dcc.Graph(figure=fig_forecast_line, className='full_card'),
+            html.Div(dcc.Graph(figure=stl_chart(stl_data, x='year_month', y='Cpi Values'), className='stl_chart')),
+            html.Div(dcc.Graph(figure=acf_pacf_plot(merged_df, 'PPI Values', lag=100),
+                               className='stl_chart')),  # ACF, PACF
+            html.Div()
+    ])
 
 
 
