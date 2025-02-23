@@ -218,7 +218,7 @@ def update_chart(start_date, end_date, value):
             x='year_month',
             y1=['Cpi Values', 'PPI Values'],
             y2=['Unemployment'],
-            title='CPI, PPI, Unemployment Values Since ' + start_date,
+            title='CPI & PPI Compared to Unemployment Rate Since ' + start_date,
             x_axis='Year',
             y1_axis='Values (%)',
             y2_axis='Unemployment Rate (%)'
