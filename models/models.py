@@ -5,8 +5,6 @@
 #    - crude price, oil production, oil consumption, food
 #   - ACF PLOT
 #   - Forecast CPI using different price point of the crude oil
-# CPI values second diff is stationary, everything else is first diff stationary
-from statistics import linear_regression
 # Maybe detrend data
 
 import pandas as pd
@@ -169,31 +167,30 @@ class Model:
 
     def xgboost(self, x_train, y_train):
 
-        param_grid = {
-            'learning_rate': [0.001, 0.1, 0.3, 0.5, 1],
-            'max_depth': [3, 5, 7],
-            'lambda': [0, 1, 10, 30, 50, 100, 200, 1000, 2000],
-            'alpha': [0, 1, 5, 10, 50, 100]
-        }
-
-        grid_serach = GridSearchCV(
-            estimator=XGBRegressor(objective="reg:squarederror"),
-            param_grid=param_grid,
-            scoring='neg_mean_squared_error',
-            cv=TimeSeriesSplit(n_splits=2)
-        )
-
-        best_param = grid_serach.fit(x_train, y_train).best_params_
-        print(best_param)
+        # param_grid = {
+        #     'learning_rate': [0.001, 0.1, 0.3, 0.5, 1],
+        #     'max_depth': [3, 5, 7],
+        #     'lambda': [0, 1, 10, 30, 50, 100, 200, 1000, 2000],
+        #     'alpha': [0, 1, 5, 10, 50, 100]
+        # }
+        #
+        # grid_serach = GridSearchCV(
+        #     estimator=XGBRegressor(objective="reg:squarederror"),
+        #     param_grid=param_grid,
+        #     scoring='neg_mean_squared_error',
+        #     cv=TimeSeriesSplit(n_splits=2)
+        # )
+        #
+        # best_param = grid_serach.fit(x_train, y_train).best_params_
 
         param = {
             'objective': "reg:squarederror",
             'eval_metric': 'rmse',
-            'n_estimators': 400,
-            'learning_rate': best_param['learning_rate'],
-            'max_depth': best_param['max_depth'],
-            'lambda': best_param['lambda'],
-            'alpha': best_param['alpha']
+            'n_estimators': 1,#300,
+            'learning_rate': 1,#best_param['learning_rate'],
+            'max_depth': 1,#best_param['max_depth'],
+            'lambda': 1,#best_param['lambda'],
+            'alpha': 1,#best_param['alpha']
         }
 
         xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
@@ -259,54 +256,63 @@ class Model:
         lr_metrics = self.metric(y_test, lr_pred)
         lr_metrics['r2'] = r2_score(y_true=y_test, y_pred=lr_pred)
         lr_forecast = self.iterative_forecast(lr_model, x_test,12)
-        print(lr_pred, '\n', lr_metrics)
-        print(lr_forecast)
+        # print(lr_forecast)
 
-        # Naives
+        # Seasonal Naives
         s_naives = self.seasonal_naives(max(lag))
-        print(s_naives)
+        # print(s_naives)
 
         # XGBoost
         xgb_model = self.xgboost(x_train, y_train)
         xgb_forecast = self.iterative_forecast(xgb_model,x_test, 12)
+        # print(xgb_forecast.reset_index())
 
         # SARIMA
         self.y = self.data.copy()
         self.y = self.year_month_index(self.y)
         x_train, x_test, y_train, y_test = self.train_test_split(test_prop=0.1)
 
-        # arima = self.sarimax(y_train, self.order[0] ,self.order[1], self.order[2],self.s_order, trend='ct')
-        # arima_pred = arima.predict(start=y_test.index[0], end=y_test.index[-1])
-        # # arima_train_metrics = self.metric(y_train, arima.predict(start=y_train.index[0], end=y_train.index[-1]))
-        # arima_test_metrics = self.metric(y_test, arima_pred)
-        # print(arima_pred)
-        # #print(arima_test_metrics)
-
         # Final SARIMA model
-        arima = self.sarimax(pd.concat([y_train, y_test], axis=0),
+        sarima = self.sarimax(pd.concat([y_train, y_test], axis=0),
                              self.order[0] ,self.order[1], self.order[2],self.s_order, trend='ct')
-        # print(self.metric(pd.concat([y_train, y_test], axis=0),
-        #                   arima.predict(start=pd.concat([y_train, y_test], axis=0).index[0],
-        #                                  end=pd.concat([y_train, y_test], axis=0).index[-1])))
-        arima_forecast = arima.get_forecast(steps=12)
-        print(arima.forecast(steps=12))
+        sarima_forecast = sarima.forecast(steps=12)
 
         # XGBoost + SARIMA
-        new_df = pd.concat([self.y.copy()[self.target], arima.resid, arima.fittedvalues], axis=1)
+        new_df = pd.concat([self.y.copy()[self.target], sarima.resid, sarima.fittedvalues], axis=1)
         new_df.columns = [self.target, 'arima_resid', 'arima_fitted_values']
         y_train_2 = new_df.iloc[max(lag):]['arima_resid']
         x_train_2 = self.lag_features(new_df, lag, remove_original=True)
         xgb_sarima = self.xgboost(x_train_2, y_train_2)
-        #print(xgb_sarima)
         resid_forecast = self.iterative_forecast(xgb_sarima, x_train_2, 12)
-        # Ensure both are Pandas Series
-        final_xgb_arima= (arima_forecast.predicted_mean.reset_index().iloc[:, 1]+
+        final_xgb_arima= (sarima.get_forecast(steps=12).predicted_mean.reset_index().iloc[:, 1]+
                           resid_forecast.reset_index().iloc[:, 1])
-        print(final_xgb_arima)
+        # print(final_xgb_arima)
 
-data = pd.read_csv('./data/bls_food.csv')
-#model = Model(df=data, y='Cpi Values')
-model = Model(df=data, y='Eggs', order=(1, 1, 1), seasonal_order=(2, 0, 0, 12))
+        final_df = pd.DataFrame()
+        final_df['year_month'] = pd.date_range(start=self.y.index[-1][:4] + '-2',
+                                     periods=max(lag), freq='MS').strftime('%Y-%m')
+        final_df = pd.concat([
+            final_df,
+            lr_forecast.reset_index().iloc[:, 1],
+            s_naives.reset_index().iloc[:, 1],
+            xgb_forecast.reset_index().iloc[:, 1],
+            sarima_forecast.reset_index().iloc[:, 1],
+            final_xgb_arima.reset_index().iloc[:, 1],
+        ], axis=1)
+        final_df.columns = [
+            'year_month',
+            self.target + ' Linear Regression Forecast',
+            self.target + ' Seasonal Naives Forecast',
+            self.target + ' XGBoost Forecast',
+            self.target + ' SARIMA Forecast',
+            self.target + ' SARIMA' + ' & XGBoost Forecast'
+        ]
+
+        return final_df
+
+# Testing purposes
+#data = pd.read_csv('./data/bls_food.csv')
+#model = Model(df=data, y='Cpi Values', order=(1, 2, 3), seasonal_order=(0, 0, 0, 0))
 #stl_1 = model.stl(data)
 #stl_1.to_csv('stl.csv')
 #model.acf('Cpi Values', lag=100)
@@ -315,13 +321,38 @@ model = Model(df=data, y='Eggs', order=(1, 1, 1), seasonal_order=(2, 0, 0, 12))
 #model = model.min_max_transform(['Cpi Values', 'PPI Values'])
 #x_train, x_test, y_train, y_test = model.train_test_split(test_prop=0.1)
 #test_lag = model.lag_features(data,[1, 3, 6, 12], True)
-model.model_building()
+#model.model_building()
 
-# Unemployement (0,1,0)
-# CPI: ARIMA(7,2,0)(2,0,0)[12]
-# PPI: ARIMA(3,1,2)(2,0,0)[12] with drift
-# Unleaded.Gasoline ARIMA(0,1,1)
-# UK.Brent.Prices: ARIMA(1,1,0)
-# WTI.Prices: ARIMA(1,1,0)
+
+dataset = [
+    './data/bls_food.csv',
+    './data/bls_gas_price.csv',
+    './data/eia_crude_price.csv'
+]
+
+sarima_order = {
+    'Cpi Values' : [(7, 2, 0), (2, 0, 0, 12)],
+    'PPI Values': [(3, 1, 2), (2, 0, 0, 12)],
+    'Unemployment': [(0,1,0), (0, 0, 0, 0)],
+    'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
+    'UK.Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
+    'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
+}
+
+result = pd.DataFrame()
+result['year_month'] = []
+
+
+for path in dataset:
+    data = pd.read_csv(path)
+    for column in data.columns[1:-1]:
+        if column in sarima_order:
+            model = Model(data, y=column, order=sarima_order[column][0],
+                          seasonal_order=sarima_order[column][1])
+            output = model.model_building()
+            result = result.merge(output, how='outer', on='year_month')
+
+result.to_csv('./data/forecast_data.csv')
+
 
 
