@@ -329,32 +329,32 @@ class Model:
 #test_model = model.model_building()
 
 # Commented out to conserve computational power
-dataset = [
-    './data/bls_food.csv',
-    './data/bls_gas_price.csv',
-    './data/eia_crude_price.csv'
-]
-
+# dataset = [
+#     './data/bls_food.csv',
+#     './data/bls_gas_price.csv',
+#     './data/eia_crude_price.csv'
+# ]
+#
 # Found using auto.arima in R
-sarima_order = {
-    'Cpi Values' : [(1, 2, 2), (2, 0, 0, 12)],
-    'PPI Values': [(1, 1, 0), (1, 0, 0, 12)],
-    'Unemployment': [(0,1,0), (0, 0, 0, 0)],
-    'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
-    'UK Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
-    'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
-}
-
-result = pd.DataFrame()
-
-for path in dataset:
-    data = pd.read_csv(path)
-    for column in data.columns[1:-1]:
-        if column in sarima_order:
-            print(f'Currently Modeling: {column}')
-            model = Model(data, y=column, order=sarima_order[column][0],
-                          seasonal_order=sarima_order[column][1])
-            output = model.model_building()
-            result = pd.concat([result, output], axis=1)
-
-result.to_csv('./data/forecast_data.csv')
+# sarima_order = {
+#     'Cpi Values' : [(1, 2, 2), (2, 0, 0, 12)],
+#     'PPI Values': [(1, 1, 0), (1, 0, 0, 12)],
+#     'Unemployment': [(0,1,0), (0, 0, 0, 0)],
+#     'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
+#     'UK Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
+#     'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
+# }
+#
+# result = pd.DataFrame()
+#
+# for path in dataset:
+#     data = pd.read_csv(path)
+#     for column in data.columns[1:-1]:
+#         if column in sarima_order:
+#             print(f'Currently Modeling: {column}')
+#             model = Model(data, y=column, order=sarima_order[column][0],
+#                           seasonal_order=sarima_order[column][1])
+#             output = model.model_building()
+#             result = pd.concat([result, output], axis=1)
+#
+# result.to_csv('./data/forecast_data.csv')
