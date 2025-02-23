@@ -153,9 +153,9 @@ class Model:
         param_grid = {
             'learning_rate': [0.1, 0.3, 0.5, 0.75],
             'max_depth': [3, 5, 7],
-            'lambda': [10, 30, 50, 100, 1000, 5000],
+            'lambda': [10, 30, 50, 100, 1000],
             'alpha': [1, 3, 5, 10],
-            'gamma': [0, 0.1, 0.2, 0.3]
+            'gamma': [0, 0.1, 0.3, 0.5, 0.7]
         }
 
         grid_serach = GridSearchCV(
@@ -179,10 +179,10 @@ class Model:
         }
 
         if x_test is not None and y_test is not None:
-            xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
+            xgb_model = XGBRegressor(**param, early_stopping_rounds=2)
             xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train), (x_test, y_test)], verbose=149)
         else:
-            xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
+            xgb_model = XGBRegressor(**param, early_stopping_rounds=2)
             xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train)], verbose=149)
 
         return xgb_model
@@ -250,9 +250,6 @@ class Model:
                                    s_t['residuals'].reset_index().iloc[-12:, 1].values +
                                    s_t['seasonal'].reset_index().iloc[-12:, 1].values)
 
-        # Seasonal Naives
-        s_naives = self.seasonal_naives(max(lag))
-
         # XGBoost
         self.y = pd.DataFrame(s_t['residuals'])
         self.y = self.lag_features(self.y, lag, False)
@@ -265,6 +262,11 @@ class Model:
                         lr_trend +
                         s_t['seasonal'].reset_index().iloc[-12:, 1].values)
         xgb_forecast = pd.DataFrame(xgb_forecast)
+
+        # Seasonal Naives
+        self.y = self.data.copy()
+        self.y = self.year_month_index(self.y)
+        s_naives = self.seasonal_naives(max(lag))
 
         # SARIMA
         self.y = self.data.copy()

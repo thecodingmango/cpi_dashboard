@@ -99,7 +99,7 @@ app.layout = html.Div(
                             },
                             style_cell={
                                 'textAlign': 'center',
-                                'padding': '12px',
+                                'padding': '6px',
                                 'backgroundColor': '#252a3a',
                                 'color': 'white',
                                 'border': '2px solid #444'
