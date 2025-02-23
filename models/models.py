@@ -319,8 +319,8 @@ class Model:
         # return final_df
 
 # Testing purposes
-data = pd.read_csv('./data/bls_food.csv')
-model = Model(df=data, y='PPI Values', order=(1, 1, 0), seasonal_order=(1, 0, 0, 12))
+#data = pd.read_csv('./data/bls_food.csv')
+#model = Model(df=data, y='PPI Values', order=(1, 1, 0), seasonal_order=(1, 0, 0, 12))
 # #stl_1 = model.stl(data)
 # #stl_1.to_csv('stl.csv')
 # #model.acf('Cpi Values', lag=100)
@@ -329,7 +329,7 @@ model = Model(df=data, y='PPI Values', order=(1, 1, 0), seasonal_order=(1, 0, 0,
 # #model = model.min_max_transform(['Cpi Values', 'PPI Values'])
 # #x_train, x_test, y_train, y_test = model.train_test_split(test_prop=0.1)
 # #test_lag = model.lag_features(data,[1, 3, 6, 12], True)
-test_model = model.model_building()
+#test_model = model.model_building()
 
 # Commented out to conserve computational power
 # dataset = [
