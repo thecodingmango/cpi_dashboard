@@ -1,9 +1,9 @@
-import pandas as pd
+import json
 import dash
 from dash import dash_table
 from layout_functions.layout_functions import *
 from datetime import datetime, timedelta
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State, MATCH, ALL
 
 # Using apis to import data
 '''
@@ -31,7 +31,6 @@ eia_api_crude_production = pd.read_csv('./data/eia_crude_production.csv')
 eia_api_crude_consumption = pd.read_csv('./data/eia_crude_consumption.csv')
 eia_emission = pd.read_csv('./data/eia_emission.csv')
 eia_emission.iloc[:, 1] = eia_emission.iloc[:, 1] / 30
-stl_data = pd.read_csv('./data/stl.csv')
 merged_df = bls_data.drop('Unnamed: 0', axis=1).merge(
     bls_gas.drop('Unnamed: 0', axis=1), how='left', on='year_month')
 merged_df = merged_df.merge(eia_petroleum_spot.drop('Unnamed: 0', axis=1), how='left', on='year_month')
@@ -45,7 +44,7 @@ external_stylesheets = [
 ]
 
 # Initialize the dash class
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 server = app.server
 app.title = 'CPI Dashboard'
 
@@ -118,9 +117,6 @@ app.layout = html.Div(
                             children=[
                                 date_picker(bls_data),
                                 drop_down(),
-                                html.Div(
-                                    id='forecasting_series'
-                                ),
                             ]
                         ),
 
@@ -142,30 +138,23 @@ app.layout = html.Div(
     className='wrapper'
 )
 
-
 @app.callback(
-    Output('forecasting_series', 'children'),
-    Input('drop_down_menu', 'value')
+    Output('forecasting_graph', 'children'),
+    [Input('start_month', 'value'),
+     Input('end_month', 'value'),
+     Input('forecasting_dropdown', 'value')],
+    prevent_initial_update=True
 )
-def forecasting_dropdown(value):
-    """Dynamically generates the forecasting series dropdown when Forecasting is selected."""
+def updating_forecasting_graph(start_date, end_date, value):
 
-    if value == 'Forecasting':
-        return html.Div(
-            dcc.Dropdown(
-            options=[
-                {'label': 'CPI', 'value': 'Cpi Values'},
-                {'label': 'Trend', 'value': 'trend'},
-                {'label': 'Seasonal', 'value': 'seasonal'},
-                {'label': 'Residuals', 'value': 'residuals'}
-            ],
-            value='Cpi Values',  # Default selection
-            clearable=False
-            ),
-            className='drop_down_menu_2'
-        )
-    else:
-        return html.Div()
+    filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
+    filtered_merged_data = merged_df.loc[filters_date_bls, :]
+
+    fig_forecast_line = go.Figure()
+    line_graph(fig_forecast_line, filtered_merged_data, 'year_month', value)
+
+    return dcc.Graph(figure=fig_forecast_line, className='full_card')
+
 
 # App callback used for updating the values in the function
 @app.callback(
@@ -176,16 +165,18 @@ def forecasting_dropdown(value):
     [
         Input('start_month', 'value'),
         Input('end_month', 'value'),
-        Input('drop_down_menu', 'value'),
-        Input('forecasting_series', 'children')
+        Input('drop_down_menu', 'value')
     ]
 )
-def update_chart(start_date, end_date, value, value_2):
+def update_chart(start_date, end_date, value):
+
 
     filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
     filtered_data_bls = bls_data.loc[filters_date_bls, :]
 
     filtered_bls_gas = bls_gas.loc[filters_date_bls, :]
+
+    filtered_merged_data = merged_df.loc[filters_date_bls, :]
 
     eia_filter = ((eia_petroleum_spot['year_month'] >= start_date) &
                   (eia_petroleum_spot['year_month'] <= end_date))
@@ -200,6 +191,12 @@ def update_chart(start_date, end_date, value, value_2):
     eia_oil_production = eia_api_crude_production.loc[eia_filter_production, :]
 
     chart_layout = []
+
+    print(json.dumps({
+        'states': dash.ctx.states,
+        'triggered': dash.ctx.triggered,
+        'inputs': dash.ctx.inputs
+    }, indent=2))
 
     def get_summary(df, column):
         if column not in df:
@@ -403,16 +400,27 @@ def update_chart(start_date, end_date, value, value_2):
 
     elif value == 'Forecasting':
 
-        chart_layout.clear()
-        fig_forecast_line = go.Figure()
-        line_graph(fig_forecast_line, filtered_data_bls, 'year_month', 'PPI Values')
-
-
+        stl_data = filtered_merged_data
 
         chart_layout = [
+            html.Div(
+                dcc.Dropdown(
+                    id='forecasting_dropdown',
+                    options=[
+                        {'label': 'Consumer Price Index', 'value': 'Cpi Values'},
+                        {'label': 'Producer Price Index', 'value': 'PPI Values'},
+                        {'label': 'Unemployment Rate', 'value': 'Unemployment'},
+                        {'label': 'Unleaded Gasoline', 'value': 'Unleaded Gasoline'},
+                        {'label': 'UK Brent Prices', 'value': 'WTI Prices'}
+                    ],
+                    value='Cpi Values',  # Default selection
+                    clearable=False
+                ),
+                className='drop_down_menu_2'
+            ),
             html.Div(dcc.Interval()),
-            html.Div(dcc.Graph(figure=fig_forecast_line, className='full_card')),  # Line chart
-            html.Div(dcc.Graph(figure=stl_chart(stl_data), className='stl_chart')),  # STL
+            html.Div(id='forecasting_graph'),  # Line chart
+            html.Div(dcc.Graph(figure=stl_chart(stl_data, x='year_month', y='Cpi Values'), className='stl_chart')),  # STL
             html.Div(dcc.Graph(figure=acf_pacf_plot(merged_df, 'PPI Values', lag=100),
                                className='stl_chart')),  # ACF, PACF
             html.Div()
@@ -423,3 +431,7 @@ def update_chart(start_date, end_date, value, value_2):
         pass
 
     return [chart_layout, table_data]
+
+
+
+

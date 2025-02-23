@@ -95,7 +95,7 @@ body {
 
 .main_top {
     display: grid;
-    justify-content: right;
+    justify-content: left;
     width: 100%;
     margin-bottom: 15px;
 }

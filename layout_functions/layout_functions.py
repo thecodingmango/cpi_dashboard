@@ -4,10 +4,9 @@ from dash import html
 from dash import dcc
 import plotly.graph_objects as go
 import plotly.express as px
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from models import models
 from plotly.subplots import make_subplots
 from statsmodels.graphics.tsaplots import acf, pacf
+from models.models import stl
 
 
 def header():
@@ -406,15 +405,17 @@ def cd_chart(df1, df2,prod_cons,title=None, x_axis=None, y_axis=None):
 
     return fig
 
-def stl_chart(data):
+def stl_chart(data, x, y):
+
+    new_df = stl(data[y])
 
     fig_subplot = make_subplots(rows=3, cols=1, shared_xaxes=True,
                                 subplot_titles=["Trend", "Seasonal", "Residual"])
 
     fig_subplot.add_trace(
         go.Scatter(
-            x=data["year_month"],
-            y=data["trend"],
+            x=data[x],
+            y=new_df["trend"],
             mode="lines",
             name="Trend"),
         row=1,
@@ -422,7 +423,7 @@ def stl_chart(data):
     fig_subplot.add_trace(
         go.Scatter(
             x=data["year_month"],
-            y=data["seasonal"],
+            y=new_df["seasonal"],
             mode="lines",
             name="Seasonal"),
         row=2,
@@ -430,7 +431,7 @@ def stl_chart(data):
     fig_subplot.add_trace(
         go.Scatter(
             x=data["year_month"],
-            y=data["residuals"],
+            y=new_df["residuals"],
             mode="markers",
             name="Residuals"),
         row=3,

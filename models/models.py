@@ -20,6 +20,20 @@ from statsmodels.tsa.seasonal import STL
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 
 
+def stl(new_df):
+
+    stl = STL(new_df, period=12)
+    stl = stl.fit()
+    result = pd.DataFrame(
+        {'trend': stl.trend,
+         'seasonal': stl.seasonal,
+         'residuals': stl.resid
+         }
+    )
+
+    return result
+
+
 class Model:
 
     def __init__(self, df, y, order, seasonal_order):
@@ -31,7 +45,6 @@ class Model:
         self.y = self.data.loc[:, [self.target, 'year_month']]
         self.order = order
         self.s_order = seasonal_order
-
 
     def check_stationarity(self, new_df):
 
@@ -64,7 +77,7 @@ class Model:
     def min_max_transform(self, columns):
 
         for item in columns:
-            self.data[item] = ((self.data[item] - self.data[item].min())/
+            self.data[item] = ((self.data[item] - self.data[item].min()) /
                                (self.data[item].max() - self.data[item].min()))
 
         return self.data
@@ -108,12 +121,11 @@ class Model:
 
         return {'mse': mse, 'rmse': rmse}
 
-
     def lag_features(self, new_df, lag, remove_original=None):
 
         for col in new_df.columns:
             for num in lag:
-                new_df[col + '_' +str(num)] = new_df[col].shift(num)
+                new_df[col + '_' + str(num)] = new_df[col].shift(num)
 
             if remove_original:
                 new_df = new_df.drop(col, axis=1)
@@ -136,20 +148,7 @@ class Model:
 
         return lr
 
-    def stl(self, new_df):
-
-        stl = STL(new_df, period=12)
-        stl = stl.fit()
-        result = pd.DataFrame(
-            {'trend': stl.trend,
-             'seasonal': stl.seasonal,
-             'residuals': stl.resid
-            }
-        )
-
-        return result
-
-    def sarimax(self, y_train,p, d, q, s,trend=None,exog=None): # Use p=1, d=1, q=1
+    def sarimax(self, y_train, p, d, q, s, trend=None, exog=None):  # Use p=1, d=1, q=1
 
         sarima = SARIMAX(
             endog=y_train,
@@ -186,11 +185,11 @@ class Model:
         param = {
             'objective': "reg:squarederror",
             'eval_metric': 'rmse',
-            'n_estimators': 1,#300,
-            'learning_rate': 1,#best_param['learning_rate'],
-            'max_depth': 1,#best_param['max_depth'],
-            'lambda': 1,#best_param['lambda'],
-            'alpha': 1,#best_param['alpha']
+            'n_estimators': 1,  #300,
+            'learning_rate': 1,  #best_param['learning_rate'],
+            'max_depth': 1,  #best_param['max_depth'],
+            'lambda': 1,  #best_param['lambda'],
+            'alpha': 1,  #best_param['alpha']
         }
 
         xgb_model = XGBRegressor(**param, early_stopping_rounds=5)
@@ -255,7 +254,7 @@ class Model:
         lr_pred = lr_model.predict(x_test)
         lr_metrics = self.metric(y_test, lr_pred)
         lr_metrics['r2'] = r2_score(y_true=y_test, y_pred=lr_pred)
-        lr_forecast = self.iterative_forecast(lr_model, x_test,12)
+        lr_forecast = self.iterative_forecast(lr_model, x_test, 12)
         # print(lr_forecast)
 
         # Seasonal Naives
@@ -264,7 +263,7 @@ class Model:
 
         # XGBoost
         xgb_model = self.xgboost(x_train, y_train)
-        xgb_forecast = self.iterative_forecast(xgb_model,x_test, 12)
+        xgb_forecast = self.iterative_forecast(xgb_model, x_test, 12)
         # print(xgb_forecast.reset_index())
 
         # SARIMA
@@ -274,7 +273,7 @@ class Model:
 
         # Final SARIMA model
         sarima = self.sarimax(pd.concat([y_train, y_test], axis=0),
-                             self.order[0] ,self.order[1], self.order[2],self.s_order, trend='ct')
+                              self.order[0], self.order[1], self.order[2], self.s_order, trend='ct')
         sarima_forecast = sarima.forecast(steps=12)
 
         # XGBoost + SARIMA
@@ -284,13 +283,13 @@ class Model:
         x_train_2 = self.lag_features(new_df, lag, remove_original=True)
         xgb_sarima = self.xgboost(x_train_2, y_train_2)
         resid_forecast = self.iterative_forecast(xgb_sarima, x_train_2, 12)
-        final_xgb_arima= (sarima.get_forecast(steps=12).predicted_mean.reset_index().iloc[:, 1]+
-                          resid_forecast.reset_index().iloc[:, 1])
+        final_xgb_arima = (sarima.get_forecast(steps=12).predicted_mean.reset_index().iloc[:, 1] +
+                           resid_forecast.reset_index().iloc[:, 1])
         # print(final_xgb_arima)
 
         final_df = pd.DataFrame()
         final_df['year_month'] = pd.date_range(start=self.y.index[-1][:4] + '-2',
-                                     periods=max(lag), freq='MS').strftime('%Y-%m')
+                                               periods=max(lag), freq='MS').strftime('%Y-%m')
         final_df = pd.concat([
             final_df,
             lr_forecast.reset_index().iloc[:, 1],
@@ -353,6 +352,3 @@ class Model:
 #             result = result.merge(output, how='outer', on='year_month')
 #
 # result.to_csv('./data/forecast_data.csv')
-
-
-
