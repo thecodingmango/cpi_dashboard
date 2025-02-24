@@ -115,12 +115,11 @@ app.layout = html.Div(
                         html.Div(
                             className='main_top',
                             children=[
-                                date_picker(bls_data),
+                                # date_picker(bls_data),
+                                html.Label("Select Page Here"),
                                 drop_down(),
                             ]
                         ),
-
-
                         # CPI chart
                         html.Div(
                             dcc.Loading(type='circle', children=[
@@ -145,13 +144,15 @@ app.layout = html.Div(
         Output('descriptive_stats_table', 'data'),
     ],
     [
-        Input('start_month', 'value'),
-        Input('end_month', 'value'),
+        #Input('start_month', 'value'),
+        #Input('end_month', 'value'),
         Input('drop_down_menu', 'value')
-    ]
+    ],
 )
-def update_chart(start_date, end_date, value):
+def update_chart(value): #(start_date, end_date, value)
 
+    start_date = bls_data['year_month'].min()
+    end_date = bls_data['year_month'].max()
 
     filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
     filtered_data_bls = bls_data.loc[filters_date_bls, :]
@@ -354,7 +355,9 @@ def update_chart(start_date, end_date, value):
                 children=[
                     dcc.Interval(),
                     html.Div(dcc.Markdown('''
-                                # Talk about this page
+                                # Note
+                                Countries are categorized into categories such as OPEC, OCED, Non-OCED due to
+                                limitations in data.
                                 ''')),
                     html.Div(children=[
                         dcc.Graph(figure=fig_production, className='map'),
@@ -375,6 +378,7 @@ def update_chart(start_date, end_date, value):
     elif value == 'Forecasting':
 
         chart_layout = [
+            html.Label("Select Series Forecast Here"),
             html.Div(
                 dcc.Dropdown(
                     id='forecasting_dropdown',
@@ -407,12 +411,10 @@ def update_chart(start_date, end_date, value):
 
 @app.callback(
     Output('forecasting_graph container', 'children'),
-    [Input('start_month', 'value'),
-     Input('end_month', 'value'),
-     Input('forecasting_dropdown', 'value')],
+    [Input('forecasting_dropdown', 'value')],
     prevent_initial_update=True
 )
-def updating_forecasting_graph(start_date, end_date, value):
+def updating_forecasting_graph(value):
 
     end = bls_data['year_month'].max()
     end = datetime.strptime(end, '%Y-%m')
