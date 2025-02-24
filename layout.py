@@ -269,12 +269,12 @@ def update_chart(value): #(start_date, end_date, value)
                     dcc.Interval(),
                     html.Div(dcc.Graph(figure=fig_cpi, className='full_card')),
                     html.Div(children=[
-                        dcc.Graph(figure=fig_commodity, className='half_card'),
-                        dcc.Graph(figure=fig_crude_price, className='half_card')
+                        dcc.Graph(figure=fig_commodity, className='full_card'),
+                        dcc.Graph(figure=fig_crude_price, className='full_card')
                     ]),
                     html.Div(children=[
-                        dcc.Graph(figure=fig_crude_production, className='half_card'),
-                        dcc.Graph(figure=fig_crude_consumption, className='half_card')
+                        dcc.Graph(figure=fig_crude_production, className='full_card'),
+                        dcc.Graph(figure=fig_crude_consumption, className='full_card')
                     ])
                 ]
 
@@ -360,12 +360,12 @@ def update_chart(value): #(start_date, end_date, value)
                                 limitations in data.
                                 ''')),
                     html.Div(children=[
-                        dcc.Graph(figure=fig_production, className='map'),
-                        dcc.Graph(figure=fig_consumption, className='map')]
+                        dcc.Graph(figure=fig_production, className='full_card'),
+                        dcc.Graph(figure=fig_consumption, className='full_card')]
                     ),
                     html.Div(children=[
-                        dcc.Graph(figure=fig_bar_prod, className='half_card'),
-                        dcc.Graph(figure=fig_bar_cons, className='half_card')]
+                        dcc.Graph(figure=fig_bar_prod, className='full_card'),
+                        dcc.Graph(figure=fig_bar_cons, className='full_card')]
                     ),
                     html.Div(dcc.Graph(figure=fig_stacked_area_prod, className='full_card')),
                     # html.Div(dcc.Graph(figure=fig_cd_production, className='full_card')),
@@ -447,9 +447,9 @@ def updating_forecasting_graph(value):
     return html.Div(
         children=[
             dcc.Graph(figure=fig_forecast_line, className='full_card'),
-            html.Div(dcc.Graph(figure=stl_chart(stl_data, x='year_month', y=value), className='stl_chart')),
+            html.Div(dcc.Graph(figure=stl_chart(stl_data, x='year_month', y=value), className='full_card')),
             html.Div(dcc.Graph(figure=acf_pacf_plot(merged_df, value, lag=50),
-                               className='stl_chart')),  # ACF, PACF
+                               className='full_card')),  # ACF, PACF
     ])
 
 
