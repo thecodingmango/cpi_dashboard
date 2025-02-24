@@ -351,9 +351,9 @@ def update_chart(value): #(start_date, end_date, value)
         )
 
         chart_layout = [
+            dcc.Interval(),
             html.Div(
                 children=[
-                    dcc.Interval(),
                     html.Div(dcc.Markdown('''
                                 # Note
                                 Countries are categorized into categories such as OPEC, OCED, Non-OCED due to
