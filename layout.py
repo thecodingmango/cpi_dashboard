@@ -158,8 +158,6 @@ def update_chart(start_date, end_date, value):
 
     filtered_bls_gas = bls_gas.loc[filters_date_bls, :]
 
-    filtered_merged_data = merged_df.loc[filters_date_bls, :]
-
     eia_filter = ((eia_petroleum_spot['year_month'] >= start_date) &
                   (eia_petroleum_spot['year_month'] <= end_date))
     eia_petro_price = eia_petroleum_spot.loc[eia_filter, :]
@@ -394,6 +392,10 @@ def update_chart(start_date, end_date, value):
                 className='drop_down_menu_2'
             ),
             html.Div(dcc.Interval()),
+            html.Div(dcc.Markdown(
+                """
+                """
+            )),
             html.Div(id='forecasting_graph container'),  # Line chart
         ]
 
@@ -412,7 +414,11 @@ def update_chart(start_date, end_date, value):
 )
 def updating_forecasting_graph(start_date, end_date, value):
 
-    filters_date_bls = ((bls_data['year_month'] >= start_date) & (bls_data['year_month'] <= end_date))
+    end = bls_data['year_month'].max()
+    end = datetime.strptime(end, '%Y-%m')
+    start = str((end - timedelta(days=365*5)).strftime('%Y-%m'))
+
+    filters_date_bls = ((bls_data['year_month'] >= start) & (bls_data['year_month'] <= str(end)))
     filtered_merged_data = merged_df.loc[filters_date_bls, :]
     filtered_forecast_data = forecast_data.loc[filters_date_bls, :]
     stl_data = filtered_merged_data
