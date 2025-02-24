@@ -171,7 +171,7 @@ class Model:
         param = {
             'objective': "reg:squarederror",
             'eval_metric': 'rmse',
-            'n_estimators': 200,
+            'n_estimators': 150,
             'learning_rate': best_param['learning_rate'],
             'max_depth': best_param['max_depth'],
             'lambda': best_param['lambda'],
@@ -179,10 +179,10 @@ class Model:
         }
 
         if x_test is not None and y_test is not None:
-            xgb_model = XGBRegressor(**param, early_stopping_rounds=2)
+            xgb_model = XGBRegressor(**param, early_stopping_rounds=3)
             xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train), (x_test, y_test)], verbose=149)
         else:
-            xgb_model = XGBRegressor(**param, early_stopping_rounds=2)
+            xgb_model = XGBRegressor(**param, early_stopping_rounds=3)
             xgb_model.fit(x_train, y_train, eval_set=[(x_train, y_train)], verbose=149)
 
         return xgb_model
@@ -335,14 +335,14 @@ class Model:
 #     './data/eia_crude_price.csv'
 # ]
 #
-# Found using auto.arima in R
+# # Found using auto.arima in R
 # sarima_order = {
-#     'Cpi Values' : [(1, 2, 2), (2, 0, 0, 12)],
-#     'PPI Values': [(1, 1, 0), (1, 0, 0, 12)],
-#     'Unemployment': [(0,1,0), (0, 0, 0, 0)],
-#     'Unleaded Gasoline': [(0, 1, 1), (0, 0, 0, 0)],
-#     'UK Brent Prices': [(1, 1, 0), (0, 0, 0, 0)],
-#     'WTI Prices': [(1, 1, 0), (0, 0, 0, 0)]
+#     'Cpi Values' : [(0, 1, 1), (0, 1, 1, 12)],
+#     'PPI Values': [(3, 0, 3), (2, 1, 0, 12)],
+#     'Unemployment': [(1, 0, 0), (2, 1, 0, 12)],
+#     'Unleaded Gasoline': [(1, 0, 1), (2, 1, 2, 12)],
+#     'UK Brent Prices': [(2, 0, 0), (1, 1, 0, 12)],
+#     'WTI Prices': [(1, 0, 2), (2, 1, 2, 12)]
 # }
 #
 # result = pd.DataFrame()
