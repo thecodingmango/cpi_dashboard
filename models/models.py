@@ -1,12 +1,12 @@
-# # - Stationarity test
-# #  - Do few different models like
-# #       - STL, ARMA, AR models, ARIMA, SARIMA, linear regression on CPI
-# #       - ARIMA with XGBoost on the residuals
-# #    - crude price, oil production, oil consumption, food
-# #   - ACF PLOT
-# #   - Forecast CPI using different price point of the crude oil
-# # Maybe detrend data
-#
+# - Stationarity test
+#  - Do few different models like
+#       - STL, ARMA, AR models, ARIMA, SARIMA, linear regression on CPI
+#       - ARIMA with XGBoost on the residuals
+#    - crude price, oil production, oil consumption, food
+#   - ACF PLOT
+#   - Forecast CPI using different price point of the crude oil
+# Maybe detrend data
+
 # import pandas as pd
 # import numpy as np
 # from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -14,22 +14,10 @@
 # from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
 # from sklearn.linear_model import LinearRegression
 # from xgboost import XGBRegressor
-# from statsmodels.tsa.seasonal import STL
+#
 # from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 #
 #
-# def stl(new_df):
-#
-#     stl = STL(new_df, period=12)
-#     stl = stl.fit()
-#     result = pd.DataFrame(
-#         {'trend': stl.trend,
-#          'seasonal': stl.seasonal,
-#          'residuals': stl.resid
-#          }
-#     )
-#
-#     return result
 #
 #
 # class Model:

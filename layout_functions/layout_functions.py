@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 from statsmodels.graphics.tsaplots import acf, pacf
-from models.models import stl
+from statsmodels.tsa.seasonal import STL
 
 
 def header():
@@ -484,3 +484,17 @@ def acf_pacf_plot(data, column, lag):
     )
 
     return fig
+
+def stl(new_df):
+
+    stl = STL(new_df, period=12)
+    stl = stl.fit()
+    result = pd.DataFrame(
+        {'trend': stl.trend,
+         'seasonal': stl.seasonal,
+         'residuals': stl.resid
+         }
+    )
+
+    return result
+
