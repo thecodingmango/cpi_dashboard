@@ -368,8 +368,8 @@ def update_chart(value): #(start_date, end_date, value)
                         dcc.Graph(figure=fig_bar_cons, className='half_card')]
                     ),
                     html.Div(dcc.Graph(figure=fig_stacked_area_prod, className='full_card')),
-                    html.Div(dcc.Graph(figure=fig_cd_production, className='full_card')),
-                    html.Div(dcc.Graph(figure=fig_cd_consumption, className='full_card'))
+                    # html.Div(dcc.Graph(figure=fig_cd_production, className='full_card')),
+                    # html.Div(dcc.Graph(figure=fig_cd_consumption, className='full_card'))
                 ]
             )
 
@@ -427,7 +427,6 @@ def updating_forecasting_graph(value):
 
     forecasting_column = [col for col in filtered_forecast_data.columns if value in col]
     forecasting_data = filtered_forecast_data[['year_month'] + forecasting_column]
-    print(forecasting_data)
 
     fig_forecast_line = go.Figure()
     line_graph(fig_forecast_line, filtered_merged_data, 'year_month', value)
