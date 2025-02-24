@@ -448,8 +448,8 @@ def updating_forecasting_graph(value):
         children=[
             dcc.Graph(figure=fig_forecast_line, className='full_card'),
             html.Div(dcc.Graph(figure=stl_chart(stl_data, x='year_month', y=value), className='stl_chart')),
-            # html.Div(dcc.Graph(figure=acf_pacf_plot(merged_df, 'PPI Values', lag=100),
-            #                    className='stl_chart')),  # ACF, PACF
+            html.Div(dcc.Graph(figure=acf_pacf_plot(merged_df, value, lag=50),
+                               className='stl_chart')),  # ACF, PACF
     ])
 
 
